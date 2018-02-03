@@ -1,6 +1,6 @@
 library(FixedPoint)
 library(testthat)
-context("Testing all convergence methods for a simple cosine function fixed point problem.")
+context("Testing cosine function in 6 dimensions.")
 
 Test_Of_Convergence = function(Function = function(x){ cos(x) }, Inputs = c(0.3, 0.4,0.5,0.6,0.7,0.8), Outputs = c(), Method = c("Newton") , ConvergenceMetric  = function(Resids){max(abs(Resids))} , ConvergenceMetricThreshold = 1e-10, MaxIter = 1e3, MaxM = 10, Dampening = 1, PrintReports = TRUE, ReportingSigFig = 5, ConditionNumberThreshold = 1e10){
 

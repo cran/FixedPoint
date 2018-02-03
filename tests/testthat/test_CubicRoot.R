@@ -1,6 +1,6 @@
 library(FixedPoint)
 library(testthat)
-context("Testing all convergence methods for a simple cubic root case fixed point problem.")
+context("Testing cubic root in 6 dimensions.")
 
 Test_Of_Convergence = function(Function = function(x){ sign(x) * abs(x)^(1/3) }, Inputs = c(0.3, 0.4,0.5,0.6,0.7,0.8), Outputs = c(), Method = c("Newton") , ConvergenceMetric  = function(Resids){max(abs(Resids))} , ConvergenceMetricThreshold = 1e-10, MaxIter = 1e3, MaxM = 10, Dampening = 1, PrintReports = TRUE, ReportingSigFig = 5, ConditionNumberThreshold = 1e10){
 

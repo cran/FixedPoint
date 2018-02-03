@@ -281,7 +281,7 @@ FPSolution = FixedPoint(Function = function(x) TwoDimensionalDiffusionIteration(
 
 ```
 
-## 4.2 Finding equilibrium prices in a pure exchange economy.
+## 4.2 Finding equilibrium prices in a pure exchange economy
 
 Consider that there are N households in a pure exchange economy. Every household has preferences over G types of good. Household $n$ has a utility function of
 
@@ -352,7 +352,7 @@ InitialGuess = rep(1,10)
 FPSolution = FixedPoint(Function = IterateOnce, Inputs =  InitialGuess, Method = "VEA")
 ```
 
-## 4.3 Valuation of an exotic perpetual American put option
+## 4.3 Valuation of a perpetual American put option with a compulsory rebuy provision
 
 Consider a perpetual American put option. It never expires unless it is exercised. There is a
 compulsory provision however that the bank buys back the option at price $\chi \geq 0$ if the

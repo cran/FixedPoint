@@ -1,6 +1,6 @@
 library(FixedPoint)
 library(testthat)
-context("Testing all convergence methods for a simple cosine function fixed point problem.")
+context("Testing Babylonian square root in 1 dimension")
 
 SequenceFunction = function(tn){0.5*(tn + 100/tn)}
 Test_Of_Convergence = function(Function = SequenceFunction, Inputs = c(6), Outputs = c(), Method = c("Newton") , ConvergenceMetric  = function(Resids){max(abs(Resids))} , ConvergenceMetricThreshold = 1e-10, MaxIter = 1e3, MaxM = 10, Dampening = 1, PrintReports = TRUE, ReportingSigFig = 5, ConditionNumberThreshold = 1e10){
@@ -20,6 +20,8 @@ test_that("Testing that each method converges in the cos(x)  case to within tole
   expect_true(Test_Of_Convergence(Method = "VEA"))      # This takes 6  iterations.
   expect_true(Test_Of_Convergence(Method = "SEA"))      # This takes 6  iterations.
 })
+
+context("Testing Babylonian square root in 100 dimensions")
 
 NumbersVector = 1:100
 SequenceFunction = function(tn){0.5*(tn + NumbersVector/tn)}
