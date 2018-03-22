@@ -8,10 +8,11 @@ This function takes a matrix with previous iterates and extrapolates the limit o
 EpsilonExtrapolation(Iterates, Method = c("VEA", "SEA"))
 }
 \arguments{
-\item{Iterates}{A matrix representing different iterates with one iterate per column. Can be pieced together from Inputs and Outputs matrices of
-the FixedPoint function using the PutTogetherIteratesWithoutJumps function}
+\item{Iterates}{A matrix representing different iterates with one iterate per column. Can be pieced together from Inputs and Outputs matrices
+of the FixedPoint function using the PutTogetherIteratesWithoutJumps function.}
 
-\item{Method}{Method for epsilon extrapolation. Should be either "VEA" for the vector extrapolation algorithm or "SEA" for the scalar epsilon algorithm.}
+\item{Method}{Method for epsilon extrapolation. Should be either "VEA" for the vector extrapolation algorithm or "SEA" for the scalar epsilon
+algorithm.}
 }
 \value{
 A vector with the extrapolated vector.

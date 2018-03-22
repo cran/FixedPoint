@@ -16,6 +16,6 @@ test_that("Testing that each method converges in the linear case to within toler
   expect_true(Test_Of_Convergence(Method = "Newton"))   # This takes 3   iterations.
   expect_true(Test_Of_Convergence(Method = "VEA"))      # This takes 25  iterations.
   #expect_true(Test_Of_Convergence(Method = "SEA"))     # Does not converge.
-  #expect_true(Test_Of_Convergence(Method = "MPE"))      # This takes 19  iterations. Fails in OpenBLAS
-  #expect_true(Test_Of_Convergence(Method = "RRE"))      # This takes 7   iterations.
+  expect_true(Test_Of_Convergence(Method = "MPE"))     # This takes 19  iterations. Fails in OpenBLAS
+  expect_true(Test_Of_Convergence(Method = "RRE"))     # This takes 7   iterations.
 })

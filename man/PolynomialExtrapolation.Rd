@@ -3,22 +3,25 @@
 \name{PolynomialExtrapolation}
 \alias{PolynomialExtrapolation}
 \title{PolynomialExtrapolation
-This function performs Minimal Polynomial extrapolation (MPE) or Reduced Rank Extrapolation (RRE) given a matrix of previous iterates of the function.}
+This function performs Minimal Polynomial extrapolation (MPE) or Reduced Rank Extrapolation (RRE) given a matrix of previous iterates of the
+function.}
 \usage{
 PolynomialExtrapolation(Iterates, Method = c("MPE", "RRE"))
 }
 \arguments{
-\item{Iterates}{A matrix of inputs and outputs excluding jumps. Can be pieced together from Inputs and Outputs matrices of the FixedPoint function using the
-PutTogetherIteratesWithoutJumps function}
+\item{Iterates}{A matrix of inputs and outputs excluding jumps. Can be pieced together from Inputs and Outputs matrices of the FixedPoint
+function using the PutTogetherIteratesWithoutJumps function.}
 
-\item{Method}{The method for polynomial extrapolation. Should be either "MPE" for minimal polynomial extrapolation or "RRE" for reduced rank extrapolation.}
+\item{Method}{The method for polynomial extrapolation. Should be either "MPE" for minimal polynomial extrapolation or "RRE" for reduced
+rank extrapolation.}
 }
 \value{
 A vector containing the extrapolated vector.
 }
 \description{
 PolynomialExtrapolation
-This function performs Minimal Polynomial extrapolation (MPE) or Reduced Rank Extrapolation (RRE) given a matrix of previous iterates of the function.
+This function performs Minimal Polynomial extrapolation (MPE) or Reduced Rank Extrapolation (RRE) given a matrix of previous iterates of the
+function.
 }
 \examples{
 FPFunction = function(x){c(0.5*sqrt(abs(x[1] + x[2])), 1.5*x[1] + 0.5*x[2])}

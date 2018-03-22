@@ -54,13 +54,13 @@ Test_Of_Convergence = function(Function = IterateOnce, Inputs = OptionPrice, Out
 
 test_that("Testing that each method converges in the quadratic case to within tolerance", {
   expect_true(Test_Of_Convergence(Method = "Anderson")) # This takes 37  iterations.
-  #expect_true(Test_Of_Convergence(Method = "Simple"))   # This takes 103 iterations and will not normally be run
-  #expect_true(Test_Of_Convergence(Method = "Aitken"))   # This takes 203 iterations and will not normally be run
-  #expect_true(Test_Of_Convergence(Method = "Newton"))  # Does not converge.
-  #expect_true(Test_Of_Convergence(Method = "VEA"))      # This takes 108 iterations and will not normally be run
-  #expect_true(Test_Of_Convergence(Method = "SEA"))      # This takes 103 iterations and will not normally be run
-  #expect_true(Test_Of_Convergence(Method = "MPE"))      # This takes 43  iterations and will not normally be run
-  #expect_true(Test_Of_Convergence(Method = "RRE"))      # This takes 52  iterations and will not normally be run
+  expect_true(Test_Of_Convergence(Method = "Simple"))   # This takes 103 iterations and will not normally be run
+  expect_true(Test_Of_Convergence(Method = "Aitken"))   # This takes 203 iterations and will not normally be run
+  #expect_true(Test_Of_Convergence(Method = "Newton"))  #  Does not converge
+  expect_true(Test_Of_Convergence(Method = "VEA"))      # This takes 108 iterations and will not normally be run
+  expect_true(Test_Of_Convergence(Method = "SEA"))      # This takes 103 iterations and will not normally be run
+  expect_true(Test_Of_Convergence(Method = "MPE"))      # This takes 43  iterations and will not normally be run
+  expect_true(Test_Of_Convergence(Method = "RRE"))      # This takes 52  iterations and will not normally be run
 })
 
 

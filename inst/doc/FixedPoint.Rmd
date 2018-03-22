@@ -12,13 +12,13 @@ vignette: >
 
 R has had a number of packages providing optimisation algorithms for many years. These include traditional optimisers through the [**optim**](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/optim.html) method, genetic algorithms through the [**rgenoud**](https://cran.r-project.org/package=rgenoud) package and response surface global optimisers through packages like [**DiceKriging**](https://cran.r-project.org/package=DiceKriging). It also has several rootfinders like the [**uniroot**](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/uniroot.html) method and the methods of the [**BB**](https://cran.r-project.org/web/packages/BB/index.html) package.
 
-Fixed point finders are conceptually similar to both optimisation and root finding algorithms but thus far implementations of fixed point finders have been rare in R. In some part this is likely because there is often an obvious method to find a fixed point by merely feeding a guessed fixed point into a function, taking the result and feeding it back into the function. By doing this repeatedly a fixed point is often found. This method (that we will call the "Simple" method) is usually convergent but it is also often slow which can be prohibitive when the function itself is expensive.
+Fixed point finders are conceptually similar to both optimisation and root finding algorithms but thus far implementations of fixed point finders have been rare in R. In some part this is likely because there is often an obvious method to find a fixed point by merely feeding a guessed fixed point into a function, taking the result and feeding it back into the function. By doing this repeatedly a fixed point is often found. This method (that we will call the "Simple" method) is often convergent but it is also often slow which can be prohibitive when the function itself is expensive.
 
 **FixedPoint** aims to provide fixed point acceleration algorithms that can be much faster than the simple method. In total eight algorithms are implemented. The first is the simple method as described earlier. There are also the Newton, Aitken and Scalar Epsilon Algorithm (SEA) methods that are designed for accelerating the convergence of scalar sequences. Four algorithms for accelerating vector sequences are also implemented including the Vector Epsilon Algorithm (VEA), two minimal polynomial algorithms (MPE and RRE)  and Anderson acceleration.
 
 In this paper section 1 starts by with a brief explanation of fixed points before section 2 describes the acceleration algorithms provided by **FixedPoint**. Here the goal is  to illustrate the logic underling each algorithm so users can better choose which suits their problem. Readers interested in the underlying mathematics are referred to the original papers. Section 3 then illustrates a few features of the package that enable users to better track the progress of an algorithm while it is running and switch algorithms if desired before a fixed point is found.
 
-Section 4 then presents several applications of these fixed point algorithms. These applications are primarily in the field of economics as that is where the interests of the authors lie but it is likely that these algorithms will also be useful in solving problems outside of this field. Finally section 5 presents a speed of convergence comparison showing how many iterations each algorithm takes in bringing each problem to its fixed point for each of the applications presented in section 4.
+Section 4 then presents several applications of these fixed point algorithms in economics, asset pricing and machine learning. Finally section 5 presents a convergence comparison showing how many iterations each algorithm takes in bringing each problem to its fixed point for each of the applications presented in section 4.
 
 # 1 Fixed point acceleration
 
@@ -26,7 +26,7 @@ A fixed point problem is one where we look for a vector, $\hat{x}$, so that for 
 
 $f(\hat{x}) = \hat{x}$
 
-If $f: N^1 \rightarrow N^1$ and thus $x$ is a scalar then one way to solve this problem would be to use a rootfinder on the function $g(x) = f(x) - x$ or to use an optimiser to minimise $h(x) = (f(x) - x)^2$. These techniques will not generally work however if $f : N^a \rightarrow N^a$ where $a$ is large. Consider for instance using a multidimensional Newtonian optimiser to minimise $h(x) = (f(x) - x)^2$. The estimation of gradients for each individual dimension may take an infeasibly long time. In addition this naive method may not make use all available information. Consider for instance that we know that the solution for $x$ will be an increasing vector (so $x_i > x_j$ for any entries of $x$  with $i > j$) but has many entries. This information can be preserved and used in the vector acceleration algorithms that we present but would be more difficult to exploit in a standard optimisation algorithm.
+If $f: N^1 \rightarrow N^1$ and thus $x$ is a scalar then one way to solve this problem would be to use a rootfinder on the function $g(x) = f(x) - x$ or to use an optimiser to minimise $h(x) = (f(x) - x)^2$. These techniques will not generally work however if $f : N^a \rightarrow N^a$ where $a$ is large. Consider for instance using a multidimensional Newtonian optimiser to minimise $h(x) = (f(x) - x)^2$. The estimation of gradients for each individual dimension may take an infeasibly long time. In addition this method may not make use all available information. Consider for instance that we know that the solution for $x$ will be an increasing vector (so $x_i > x_j$ for any entries of $x$  with $i > j$) but has many entries. This information can be preserved and used in the vector acceleration algorithms that we present but would be more difficult to exploit in a standard optimisation algorithm.
 
 **FixedPoint** implements eight algorithms for finding fixed points. The first algorithm implemented in this package is the "simple" method which merely takes the output of a function and feeds it back into the function. For instance starting with a guess of $x_0$, the next guess will be $x_1 = f(x_0)$. The guess after that will be $x_2 = f(x_1)$ and so on. In some conditions $f$ will be a contraction mapping and so the simple method will be guaranteed to converge to a unique fixed point [@StokeyLucasPrescott1989]. Even when this is the case however the simple method may only converge slowly which can be inconvenient. The other seven methods this package implements are designed to be faster than the simple method but may not be convergent for every problem. 
 
@@ -40,9 +40,9 @@ $x_{i+1} = x_i - \frac{g(x_i)}{g^\prime(x_i)}$
 
 **FixedPoint** approximates the derivative $g^\prime(x_i)$ so that we use an estimated fixed point of: 
 
-$x_{i+1} = x_i - \frac{g(x_i)}{  \frac{ g(x_i) - g(x_{i-1})}{x_i-x{i-1}}      }$
+$x_{i+1} = x_i - \frac{g(x_i)}{  \frac{ g(x_i) - g(x_{i-1})}{x_i-x_{i-1}}      }$
 
-The implementation of the Newton method in this package uses this formula to predict the fixed point given two previous iterates.[^1] This method is designed for use with scalar functions. If it is used with higher dimensional functions that take and return vectors then it will be used elementwise.
+The implementation of the Newton method in this package uses this formula to predict the fixed point given two previous iterates.[^1] This method is designed for use with scalar functions. If it is used with higher dimensional functions that take and return vectors then it will be used elementwise. For vector elements for which $g(x_i) = g(x_{i-1})$ and the derivative is zero **FixedPoint** will substitute in the corresponding value from a simple iterate.
 
 [^1]: Only two rather than three are required because we can use $x_{i+1} = f(x_i)$ and $x_{i+2} = f(x_{i+1})$.
 
@@ -53,18 +53,18 @@ Consider that a sequence of scalars $\{ x_i \}_{i=0}^\infty$ that converges line
 
 $\frac{\hat{x} - x_{i+1}}{\hat{x} - x_i} \approx \frac{\hat{x} - x_{i+2}}{\hat{x} - x_{i+1}}$
 
-For a concrete example consider that every iteration halves the distance between the current iterate and the fixed point. In this case the left hand side will be one half which will equal the right hand side which will also be one half.
+For a concrete example consider that every iteration halves the distance between the current vector and the fixed point. In this case the left hand side will be one half which will equal the right hand side which will also be one half.
 
 This above expression can be simply rearranged to give a formula predicting the fixed point that is used as the subsequent iterate. This is:
 
 $x_{i+1} = x_{i} - \frac{  (x_{i+1} - x_i)^2  }{  x_{i+2} - 2x_{i+1} + x_i}$
 
-The implementation of the Aitken method in **FixedPoint** uses this formula to predict the fixed point given two previous iterates. This method is designed for use with scalar functions. If it is used with higher dimensional functions that take and return vectors then it will be used elementwise.
+The implementation of the Aitken method in **FixedPoint** uses this formula to predict the fixed point given two previous iterates. This method is designed for use with scalar functions. If it is used with higher dimensional functions that take and return vectors then it will be used elementwise. 
+For vector elements for which $x_{i+2} - 2x_{i+1} + x_i = 0$  and there is division by zero **FixedPoint** will substitute in the corresponding value from a simple iterate.
 
 ## 2.3 Epsilon algorithms
 
-The epsilon algorithms introduced by @Wynn1962 extrapolate to a fixed point without requiring matrix inversion. This vignette will present a brief numerical example and refer readers to @Wynn1962 or @SmithFordSidi1987 for detailed mathematical explanations.
-
+The epsilon algorithms introduced by @Wynn1962 provides an alternate method to extrapolate to a fixed point. This paper will present a brief numerical example and refer readers to @Wynn1962 or @SmithFordSidi1987 for a mathematical explanation of why it works.
 The basic epsilon algorithm starts with a column of iterates (column B in the below figure). If $i$ iterates have been performed then this column will have a length of $i+1$ (the initial starting guess and the results of the $i$ iterations). Then a series of columns are generated by means of the below equation:
 
 $\epsilon_{c+1}^r = \epsilon_{c-1}^{r+1} + (\epsilon_{c}^{r+1} - \epsilon_{c}^{r})^{-1}$
@@ -91,8 +91,7 @@ For the MPE method the extrapolated vector, $s$, is found by:
 
 $s = \frac{ \sum^k_{ j=0 }  c_j x_j }{ \sum^k_{j=0} c_j }$
 
-Where the coefficient vector is found by $c = -U^{+} u_k$ where $U^{+}$  is the Moore-Penrose generalised inverse of the $U$ matrix.
-
+Where the coefficient vector is found by $c = -U^{+} u_k$ where $U^{+}$  is the Moore-Penrose generalised inverse of the $U$ matrix. 
 In the case of the RRE the extrapolated vector, $s$, is found by:
 
 $s = x_0 - U V^+ u_0$
@@ -101,7 +100,7 @@ $s = x_0 - U V^+ u_0$
 
 @Anderson1965 acceleration is an acceleration algorithm that is well suited to functions of vectors. Similarly to the minimal polynomial algorithms it takes a weighted average of previous iterates. It is different however to these algorithms (and the VEA algorithm) in that previous iterates need not be sequential but any previous iterates can be used.
 
-Consider that we have previously run an N-dimensional function M times. We can define a matrix $G_i = [g_{i-M} , g_{i-M+1}, ... , g_i]$ where $g(x_j) = f(x_j) - x_j$. That is 10 iterations of the function have been run before and the function takes and returns a vector of 20 length then $G_i$ will be a 20 x 10 dimensional matrix. Each column of this matrix will give the amount of ``movement'' that occurred in a run of the function.
+Consider that we have previously run an N-dimensional function M times. We can define a matrix $G_i = [g_{i-M} , g_{i-M+1}, ... , g_i]$ where $g(x_j) = f(x_j) - x_j$. Each column of this matrix can be interpreted as giving the amount of ``movement'' that occurred in a run of the function.
 
 Now Anderson acceleration defines a weight to apply to each column of the matrix. This weight vector is M-dimensional and can be denoted $\{\mathbf{\alpha} = \alpha_0, \alpha_1,  ... , \alpha_M\}$. These weights are determined by means of the following optimisation:
 
@@ -114,12 +113,9 @@ With these weights we can then create the expression for the next iterate as:
 
 $x_{i+1} = \sum_{j=0}^M \alpha_j f(x_{i-M+j})$
 
-The actual implementation differs from the proceeding description by recasting the optimisation problem as an unconstrained least squares problem (see @FangSaad2009 or @WalkerNi2011) but in practical terms is identical.[^2]
+The actual implementation differs from the proceeding description by recasting the optimisation problem as an unconstrained least squares problem (see @FangSaad2009 or @WalkerNi2011) but in practical terms is identical.
 
-[^2]: Whilst a computationally efficient mechanism for the least squares problem is suggested in @Walker2010, this is not implemented in **FixedPoint**. The first reason is that **FixedPoint** is primarily written to aid in cases when the fixed point function is computationally intensive. This means that the least squares problem is likely to take negligible  time compared to the fixed point problem. The second reason is that Walker's mechanism relies on saving and adapting QR matrices between iterates. This would complicate the use of this package's functions in cases where the user wants to switch acceleration algorithm or to use parallelisation.
-
-
-# 3. Using the FixedPoint package
+# 3.  Using the FixedPoint package
 
 ## 3.1 Basic examples of using FixedPoint
 
@@ -129,39 +125,36 @@ Now we will demonstrate how **FixedPoint** can be used for simple problems. For 
 
 $t_{n+1} = \frac{1}{2} \left[ t_n + \frac{x}{t_n} \right]$
 
-This is a fast converging and inexpensive sequence which probably makes an acceleration algorithm overkill but for exposition sake we can implement this in **FixedPoint**. In the next code block we find the square root of 100 with the simple and Newton methods:
+This is a fast converging and inexpensive sequence which probably makes an acceleration algorithm overkill but for sake of exposition we can implement this in **FixedPoint**. In the next code block we find the square root of 100 with the simple method:
 ```{r, fig.show='hold', fig.width=7, fig.height=4.5}
 library(FixedPoint)
 SequenceFunction = function(tn){0.5*(tn + 100/tn)}
 
-Simple   = FixedPoint(Function=SequenceFunction,Inputs = 6,  Method = "Simple")
-# or to accelerate with the Newton method:
-Newton   = FixedPoint(Function=SequenceFunction,Inputs = 6,  Method = "Newton")
+FP_Simple   = FixedPoint(Function=SequenceFunction,Inputs = 6,  Method = "Simple")
 ```
 
 We can also solve for a vector of fixed points at the same time. For instance every square root from 1 to 100.
 ```{r, fig.show='hold', fig.width=7, fig.height=4.5}
 NumbersVector = 1:100
 SequenceFunction = function(tn){0.5*(tn + NumbersVector/tn)}
-Aitken   = FixedPoint(Function = SequenceFunction, Inputs = 1:100,  Method = "Aitken")
-SEA   = FixedPoint(Function = SequenceFunction, Inputs = 1:100,  Method = "SEA")
+FP_SEA   = FixedPoint(Function = SequenceFunction, Inputs = 1:100,  Method = "RRE")
 ```
-Note that in this case the Aitken and SEA methods are being applied elementwise.
+Note that in this case the RRE method is being applied elementwise.
 
 ### Vectorised functions
 
 The utility of the acceleration algorithms contained in **FixedPoint** are more apparent when applied to vectorised functions with cross dependency. For a simple example consider the below function where each entry of the vector depends on both entries of the previous iterate.
 ```{r, fig.show='hold', fig.width=7, fig.height=4.5}
 SimpleVectorFunction = function(x){c(0.5*sqrt(abs(x[1] + x[2])), 1.5*x[1] + 0.5*x[2])}
-Simple = FixedPoint(Function = SimpleVectorFunction, Inputs = c(0.3,900), Method = "Simple")
-Anderson = FixedPoint(Function = SimpleVectorFunction, Inputs = c(0.3,900), Method = "Anderson")
+FP_Simple = FixedPoint(Function = SimpleVectorFunction, Inputs = c(0.3,900), Method = "Simple")
+FP_Anderson = FixedPoint(Function = SimpleVectorFunction, Inputs = c(0.3,900), Method = "Anderson")
 ```
 This function takes 105 iterates to find a fixed point with the simple method but only 14 with the Anderson acceleration method.
 
 
 ## 3.2 Easily changing algorithm
 
-A key priority in writing **FixedPoint** is for easiness and efficiency in changing algorithms. The algorithm can be stopped and then restarted without having to repeat earlier iterations. This can be seen in the simple example below:
+A key priority in writing **FixedPoint** is for ease in changing fixed point method. The algorithm can be stopped and then restarted without having to repeat earlier iterations. This can be seen in the simple example below:
 ```{r, fig.show='hold', fig.width=7, fig.height=4.5}
 Run1 = FixedPoint(Function = function(x){x^0.2}, Inputs = c(0.3, 0.4,0.5),
                 Method = "Aitken")
@@ -205,7 +198,7 @@ ConvergenceFig(FPSolution$Inputs, FPSolution$Outputs, FPSolution$Convergence)
 ChangePerIterate(FPSolution$Inputs, FPSolution$Outputs, FPSolution$Convergence, 
                  FromIterate = 2, ToIterate = 2, secondhold = -1)
 # Sometimes there is something more meaningful than the vector index to put on the x axis
-# in the ChangePerIterate plot. The consumers's budget in the consumption smoothing case 
+# in the ChangePerIterate plot. The consumer's budget in the consumption smoothing case 
 # is a good example. In these cases we can add them to the xaxis argument of the function.
 # For instance we can add xaxis = StretchFactor in this case and we get the third figure 
 # below:
@@ -214,12 +207,9 @@ ChangePerIterate(FPSolution$Inputs, FPSolution$Outputs, FPSolution$Convergence,
 
 ```
 
-THese plots are designed to be simple and informative but they are clearly not publication quality. Should more attractive plots be necessary users can take the data output by the FixedPoint function to create them. The FixedPoint function can also be placed in a loop with MaxIter = 1 which would allow users to write their own plotting functions to display after every iteration.
-
-
 ## 3.4 Graceful error handling
 
-Hopefully **FixedPoint** is well tested enough that most kind of errors will be rare. Errors are likely however in cases where inputs functions have a restricted domain. For example this may include functions that require the input vector to have a particular shape (ie concavity) or functions where the input vector must be strictly positive. For a simple example consider the problem we introduced in section 3.1. Now rather than $x^1_t = \frac{\sqrt{\vert x^1_{t-1} + x^2_{t-1} \vert}}{2}$ we have $x^1_t = \frac{\sqrt{x^1_{t-1} + x^2_{t-1}}}{2}$. This is no longer real valued if the sum of the previous vector is negative. This is what occurs in the 5th iterate of the Anderson method applied to this problem.
+Hopefully **FixedPoint** is well tested enough that most kind of errors will be rare. Errors are likely however in cases where inputs functions have a restricted domain. For example this may include functions that require the input vector to have a particular shape (ie concavity) or functions where the input vector must be strictly positive. For a simple example consider the vectorised function we introduced in section 3.1. Now rather than $x^1_t = \frac{\sqrt{\vert x^1_{t-1} + x^2_{t-1} \vert}}{2}$ we have $x^1_t = \frac{\sqrt{x^1_{t-1} + x^2_{t-1}}}{2}$. This is no longer real valued if the sum of the previous iterate is negative. This is what occurs in the 5th iterate of the Anderson method applied to this problem.
 
 The FixedPoint function handles these situations gracefully by saving all previous results as well as the proposed new vector that lead to the error. In these cases the "Finish" message in the output describes the form of error, the "NewInputVector" list entry contains the attempted vector that was input to the function and the "NewOutputVector" list entry contains the result of applying the function to NewInputVector. This output information can be seen in the example below. 
 
@@ -244,13 +234,37 @@ FPSolution = FixedPoint(Function = SimpleVectorFunction, Inputs = FPSolution$Inp
                         Outputs = FPSolution$Outputs, Method = "Anderson")
 ```
 
+## 3.5 Convergence by constant increments
+
+Most of the methods included in this function will fail in finding the fixed point of a function that converges by a fixed increment. 
+For instance we may have a function that takes $x$ and returns $x$ shifted 1 unit (in Euclidian norm) in a straight line 
+towards its fixed point. A realistic example of this is the training of a perceptron classifier which is explored later in section 4.3.
+
+This case is problematic for all methods except for the simple method. The basic problem
+can be illustrated simply by looking at the Newton method and the Aitken method. For the Newton method the derivative
+is approximated by $\frac{ g(x_i) - g(x_{i-1})}{x_i-x{i-1}}$. When there is convergence by constant increments then 
+$g(x_i) = g(x_{i-1}) $ and the derivative is zero which means calculating the Newton method's recommended new guess of the
+fixed point involves division by zero. Now considering the Aitken method the new guess is given by 
+$x_{i+1} = x_{i} - \frac{  (x_{i+1} - x_i)^2  }{  x_{i+2} - 2x_{i+1} + x_i}$.
+When there is convergence by constant increments then $x_i - x_{i+1} = x_{i+1} - x_{i+2}$  and so we have $x_{i+2} - 2x_{i+1} + x_i = (x_i - x_{i+1}) - (x_{i+1} - x_{i+2}) = 0$. It is against not possible to calculate the new guess.[^5]
+
+More generally similar problems exist for the other acceleration methods. When there is convergence by constant increments
+then then the fixed point method receives information about what direction to go in but no information about how far to go.
+This is a complication that is common to all of these acceleration methods in this package.
+In these cases it may be possible to change the function to make it converge by varying increments while retaining the 
+same set of fixed points. This is shown in the perceptron example in section 4.3. In other cases where it is not possible
+to modify the function, it is advisable to use the simple method.
+
+[^5]: When these complications arise the Newton method and the Aitken method will revert to using the simple method to create
+a new guess for the fixed point. A warning will be emitted to inform the user of this. 
+
 # 4. Applications of fixed point acceleration
 
 ## 4.1 Gas diffusion
 
-For our first real-world example consider we want to model the diffusion of gas in a two dimensional space. We set up a two dimensional grid split into $\phi$ divisions along the side so there are $\phi^2$ grid squares in total. Pure oxygen is being released at location $(1,1)$ and pure nitrogen is being released at location $(\phi,\phi)$. We are interested in determining the steady state gas concentrations in each square of the grid. We will model equilibrium as occuring when each square has a gas concentration equal to the average of itself with its contiguous squares.[^5] 
+For our first real-world example consider we want to model the diffusion of gas in a two dimensional space. We set up a two dimensional grid split into $\phi$ divisions along the side so there are $\phi^2$ grid squares in total. Pure oxygen is being released at location $(1,1)$ and pure nitrogen is being released at location $(\phi,\phi)$. We are interested in determining the steady state gas concentrations in each square of the grid. We will model equilibrium as occurring when each square has a gas concentration equal to the average of itself with its contiguous squares.[^6] 
 
-[^5]: Each corner square has two contiguous squares, each perimeter square borders three and each interiour square borders four.
+[^6]: Each corner square has two contiguous squares, each perimeter square borders three and each interior square borders four.
 
 ```{r, fig.show='hold', fig.width=10, fig.height=4.5}
 phi = 10
@@ -352,15 +366,104 @@ InitialGuess = rep(1,10)
 FPSolution = FixedPoint(Function = IterateOnce, Inputs =  InitialGuess, Method = "VEA")
 ```
 
-## 4.3 Valuation of a perpetual American put option with a compulsory rebuy provision
+## 4.3 The training of a perceptron classifier
+
+The perceptron is one of the oldest and simplest machine learning algorithms (@Rosenblatt1958). In its simplest form,
+for each observation it is applied it uses an N-dimensional vector of features $x$ together with N+1 weights $\mathbf{w}$ to classify the observation as being in category one or category zero. It classifies observation $j$ as a type one if $w_0 + \sum_{i=1}^N w_i x_{i,j}  > 0$
+and as a type zero otherwise.
+
+The innovation of the perceptron was its method for training its weights, $\mathbf{w}$. This is done by looping over a set of observations
+that can be used for training (the ``training set'') and for which the true category information is available. 
+The perceptron classifies each observation. When it correctly classifies an observation no action is taken. On the other hand when the perceptron
+makes an error then it updates its weights with the following expressions.
+$$w_{0}^\prime = w_{0} + ( d_{j} - y_{j} )$$
+$$w_{i}^\prime = w_{i} + ( d_{j} - y_{j} ) x_{j,i} \hspace{1cm} \text{ for } i \geq 0$$
+
+Where $w_i$ is the old weight for the $i$'th feature and $w_{i}^\prime$ is the updated weight. $x_{j,i}$ is the feature value for
+observation $j$'s feature $i$, $d_{j}$ is the category label for observation $j$ and $y_j$ is the perceptron's prediction for this 
+observation’s category.
+
+This training algorithm can be rewritten as fixed point problem. We can write a function that takes perceptron weights, loops over the 
+data updating these weights and then returns the updated weight vector. If the perceptron classifies every observation correctly then 
+the weights will not update and we are at a fixed point.[^7] 
+
+[^7]: Note that for perceptrons there are always uncountably many such fixed points 
+where the perceptron correctly classifies the entire training set and will not further update. On the other hand it is possible that 
+the data is not linearly separable in which case there may be no fixed point and the weights will continue to update forever.
+
+The acceleration methods of **FixedPoint** perform poorly in accelerating the convergence of this perceptron training algorithm. This is due to the perceptron often converging by a fixed increment. This occurs because multiple iterates can result in the same observations being misclassified and hence the same change in the weights. As a result we will use the simple method which is guaranteed to be convergent for this problem (@Novikoff1963).
+
+```{r, fig.show='hold', fig.width=7, fig.height=4.5}
+# Generating linearly seperable data
+set.seed(10)
+data = data.frame("x1" = rnorm(100,4,2), "x2" = rnorm(100,8,2), y = -1)
+data = rbind(data,  data.frame("x1" = rnorm(100,-4,2), "x2" = rnorm(100,12), y = 1)  )
+
+# Iterating training of Perceptron
+IteratePerceptronWeights = function(w, LearningRate = 1){
+  intSeq = 1:length(data[,"y"])
+  for (i in intSeq){
+    target = data[i,c("y")]
+    score  =  w[1] + (w[2]*data[i, "x1"]) + (w[3]*data[i, "x2"])
+    ypred  = 2*(as.numeric( score > 0 )-0.5)
+    update = LearningRate * 0.5*(target-ypred)
+    w[1]   = w[1] + update
+    w[2]   = w[2] + update*data[i, "x1"]
+    w[3]   = w[3] + update*data[i, "x2"]
+  }
+  return(w)
+}
+
+plotLine = function(w){
+  xrange = seq(-10,10,length.out = 100)
+  yrange = -(w[2]/w[3])[[1]] * xrange - w[1]/w[3]
+  plot(data$x1, data$x2, col = data$y+2)
+  lines(xrange, yrange)
+}
+
+
+InitialGuess = c(1,1,1)
+FP = FixedPoint(Function = IteratePerceptronWeights, Inputs =  InitialGuess,
+                Method = "Simple", MaxIter = 1200)
+plotLine(FP$FixedPoint)
+```
+
+Only the simple method is convergent here and it is relatively slow taking 1121 iterations. We can still get a benefit from acceleration however if we can modify the training algorithm to give training increments that change depending on distance from the fixedpoint. This can be done by updating the weights by an amount proportional to a concave function of the norm of $wx+b$.
+This is done in the next piece of code where the MPE method is used. It can be seen that there is a substantial increase in speed with only 54 iterations required with the MPE method.
+
+
+```{r, fig.show='hold', fig.width=7, fig.height=4.5}
+IteratePerceptronWeights = function(w, LearningRate = 1){
+  intSeq = 1:length(data[,"y"])
+  for (i in intSeq){
+    target = data[i,c("y")]
+    score  =  w[1] + (w[2]*data[i, "x1"]) + (w[3]*data[i, "x2"])
+    ypred  = 2*(as.numeric( score > 0 )-0.5)
+    if ((target-ypred) != 0){
+      update = LearningRate * -sign(score) * sqrt(abs(score))
+      w[1] = w[1] + update
+      w[2] = w[2] + update*data[i, "x1"]
+      w[3] = w[3] + update*data[i, "x2"]
+    }
+  }
+  return(w)
+}
+
+FP = FixedPoint(Function = IteratePerceptronWeights, Inputs =  InitialGuess, Method = "MPE")
+```
+
+## 4.4 Valuation of a perpetual American put option with a compulsory rebuy provision
 
 Consider a perpetual American put option. It never expires unless it is exercised. There is a
 compulsory provision however that the bank buys back the option at price $\chi \geq 0$ if the
-underlying price exceeds $\alpha S$ where $\alpha > 1$ and $S$ is the strike price. We will denote
+underlying price exceeds $\alpha S$ where $\alpha > 1$ and $S$ is the strike price.[^10] We will denote
 x to be the current market price, $\sigma$ is the market volatility, $d$ is the risk free rate.
 
 Each period we discount by $d$.  The underlying price either increases by a multiple of $e^\sigma$ or decreases
 by a multiple of $e^{-\sigma}$. We have $-\sigma < d < \sigma$.
+
+[^10]: In the case where no rebuy provision exists we can approximate the value of the option well by using a high value of
+$\alpha$ and setting $\chi$ to zero. This is likely to be accurate as an option far out of the money has very low value.
 
 Given the risk neutral pricing principle the returns from holding the stock must equal the risk-free rate. Hence we must
 have $pe^{\sigma} + (1-p)e^{-\sigma} = e^{d}$. This implies that:
@@ -372,9 +475,9 @@ This can be solved by means of a fixed point algorithm as shown below:
 ```{r, fig.show='hold', fig.width=10, fig.height=4.5}
 d = 0.05
 sigma = 0.1
-alpha = 2
+alpha = 4
 S = 10
-chi = 1
+chi = 0
 p = (exp(d) - exp(-sigma) ) / (exp(sigma) - exp(-sigma))
 
 # Initially lets guess the value decreases linearly from S (when current price is 0) to
@@ -410,7 +513,7 @@ IterateOnce = function(OptionPrice){
 FPSolution = FixedPoint(Function = IterateOnce, Inputs = OptionPrice, Method = "MPE")
 ```
 
-## 4.4 A consumption smoothing problem
+## 4.5 A consumption smoothing problem
 
 Consider an infinitely lived consumer that has a budget of $B_t$ at time $t$ and a periodic income of $1$. She has a periodic utility function given by $\epsilon_t x_t^\delta$, where $x_t$ is spending in period $t$ and $\epsilon_t$ is the shock in period $t$ drawn from some stationary nonnegative shock process with pdf $f(\epsilon)$ defined on the interval $[y,z]$. The problem for the consumer in period $t$ is to maximise their value function:
 
@@ -469,6 +572,8 @@ FPSolution = FixedPoint(Function = IterateOnce,Inputs = InitialGuess,Method = c(
 ```
 
 This takes 16 iterates which is drastically better than the 459 iterates it takes with the simple method.
+
+### Using parallelisation with the Anderson method
 
 We might want to get it going even faster however though parallelisation. The easiest way to do this for this problem is to parallelise the for loop through the budgetspace. For exposition however we will show how to do this by doing multiple iterates at the same time. We will do this by using 2 cores. Each will produce an new guess vector utilising a different subset of previous iterates. The first core will have all previous iterates with the other core missing the second best previous iterates. 
 
@@ -560,13 +665,13 @@ This takes 28 iterates which takes approximately the same time as running $2 + \
 
 # 5. Performance comparison
 
-All of these algorithms were run for a variety of problems. In addition to all of the above problems fixed points were found for some basic analytical functions such as $cos(x)$, $x^\frac{1}{3}$ and the linear case of $95(18-x)$.[^6] The results are shown below:
+All of these algorithms were run for a variety of problems. In addition to all of the above problems fixed points were found for some basic analytical functions such as $cos(x)$, $x^\frac{1}{3}$ and the linear case of $95(18-x)$.[^11] The results are shown below:
 
-[^6]: The starting guesses, convergence criteria, etc can also be found in these testing files.
+[^11]: The starting guesses, convergence criteria, etc can also be found in these testing files.
 
 ![The Performance of each algorithm on test cases](PerformanceTable.png)
 
-It can be seen that only algorithms designed for vectors: Anderson; VEA; MPE and RRE converged in all cases. Anderson performed the best all over with convergence usually being among the fastest for each problem. These results also show that the SEA is rarely effective for vectorised functions and the VEA performs better in nearly all cases.
+It can be seen that Anderson performed well in almost all cases which is why it is the default method of the package. The MPE and RRE are often slower than the Anderson method but MOE and RRE did converge in more cases. These results also show that the SEA is rarely effective for vectorised functions and the VEA performs better in nearly all cases.
 
 ## References
 

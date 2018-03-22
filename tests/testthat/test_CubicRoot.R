@@ -13,7 +13,7 @@ test_that("Testing that each method converges in the cubic root case to within t
   expect_true(Test_Of_Convergence(Method = "Anderson")) # This takes 12  iterations.
   expect_true(Test_Of_Convergence(Method = "Simple"))   # This takes 22  iterations.
   expect_true(Test_Of_Convergence(Method = "Aitken"))   # This takes 9   iterations.
-  expect_true(Test_Of_Convergence(Method = "Newton"))   # This takes 9   iterations.
+  expect_true(Test_Of_Convergence(Method = "Newton"))   # This takes 9  iterations.
   expect_true(Test_Of_Convergence(Method = "MPE"))      # This takes 9   iterations.
   expect_true(Test_Of_Convergence(Method = "RRE"))      # This takes 10  iterations.
   expect_true(Test_Of_Convergence(Method = "VEA"))      # This takes 13  iterations.

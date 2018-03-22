@@ -37,12 +37,12 @@ Test_Of_Convergence = function(Function = OneIterateBudgetValues, Inputs = Initi
 
 # Note this is a slow function so we only run Anderson below.
 test_that("Testing that each method converges in the quadratic case to within tolerance", {
-  expect_true(Test_Of_Convergence(Method = "Anderson")$Convergence)  # This takes 17  iterations.
-  #expect_true(Test_Of_Convergence(Method = "Simple")$Convergence)   # This takes 459 iterations and so will not be normally run.
-  #expect_true(Test_Of_Convergence(Method = "Aitken")$Convergence)   # Does not converge.
-  #expect_true(Test_Of_Convergence(Method = "Newton")$Convergence)   # Does not converge.
-  #expect_true(Test_Of_Convergence(Method = "VEA")$Convergence)       # This takes 204 iterations and so will not be normally run.
-  #expect_true(Test_Of_Convergence(Method = "SEA")$Convergence)      # Does not converge.
-  #expect_true(Test_Of_Convergence(Method = "MPE")$Convergence)       # This takes 61  iterations and so will not be normally run.
-  #expect_true(Test_Of_Convergence(Method = "RRE")$Convergence)       # This takes 97  iterations and so will not be normally run.
+    expect_true(Test_Of_Convergence(Method = "Anderson")$Convergence)  # This takes 17  iterations.
+    #expect_true(Test_Of_Convergence(Method = "Simple")$Convergence)   # This takes 459 iterations and so will not be normally run.
+    #expect_true(Test_Of_Convergence(Method = "Aitken")$Convergence)   # Does not converge.
+    #expect_true(Test_Of_Convergence(Method = "Newton")$Convergence)   # Does not converge.
+    #expect_true(Test_Of_Convergence(Method = "VEA")$Convergence)      # This takes 204 iterations and so will not be normally run.
+    #expect_true(Test_Of_Convergence(Method = "SEA")$Convergence)      # Does not converge.
+    #expect_true(Test_Of_Convergence(Method = "MPE")$Convergence)      # This takes 61  iterations and so will not be normally run.
+    #expect_true(Test_Of_Convergence(Method = "RRE")$Convergence)      # This takes 97  iterations and so will not be normally run.
 })

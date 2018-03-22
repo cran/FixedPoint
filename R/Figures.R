@@ -9,7 +9,8 @@
 #' @param ShowInputs A boolean describing whether to show the inputs in the figure.
 #' @param ShowOutputs A boolean describing whether to show the outputs in the figure.
 #' @param ShowPrevious A boolean describing whether to show the previous inputs/outputs in the figure.
-#' @param xaxis A vector for meaningful values corresponding to the input/output values. By default the indexes of each input/output vector are used.
+#' @param xaxis A vector for meaningful values corresponding to the input/output values. By default the indexes of each input/output vector
+#' are used.
 #' @param secondhold If this is -1 or less then all plotting happens immediately. This means that very quickly only the last iterate will be seen
 #' so it makes sense to do it only if FromIterate and ToIterate indicate only one iterate. If this is 0 then a user can click through each figure.
 #' If this is positive then it describes how many seconds to pause between frames. By default this is 0 so a user must click through each frame.
@@ -24,9 +25,11 @@
 #' ChangePerIterate(A$Inputs, A$Outputs, A$Convergence)
 #' #Any now to have it play one frame every half a second starting from the nineth iterate
 #' ChangePerIterate(A$Inputs, A$Outputs, A$Convergence, secondhold = 0.5, FromIterate = 9)
-ChangePerIterate = function(Inputs, Outputs, ConvergenceVector = c(), ConvergenceSigFig = 5, ShowInputs = TRUE, ShowOutputs = TRUE, ShowPrevious  = TRUE, xaxis = c(), secondhold = 0, FromIterate = 1, ToIterate = c()){
+ChangePerIterate = function(Inputs, Outputs, ConvergenceVector = c(), ConvergenceSigFig = 5, ShowInputs = TRUE, ShowOutputs = TRUE,
+                            ShowPrevious  = TRUE, xaxis = c(), secondhold = 0, FromIterate = 1, ToIterate = c()){
 
-  if (ShowInputs + ShowOutputs < 0.5){stop("It is not possible to use this function without showing inputs or outputs (as nothing will be drawn). Set ShowInputs and/or ShowOutputs to TRUE.")}
+  if (ShowInputs + ShowOutputs < 0.5){stop("It is not possible to use this function without showing inputs or outputs (as nothing will be drawn).
+                                           Set ShowInputs and/or ShowOutputs to TRUE.")}
   if (ShowInputs){ylab = "Inputs (in red)."}
   if (ShowOutputs){ylab = "Outputs (in blue)."}
   if (all(ShowInputs, ShowOutputs)){ylab = "Inputs (in red), Outputs (in blue)."}
@@ -38,9 +41,14 @@ ChangePerIterate = function(Inputs, Outputs, ConvergenceVector = c(), Convergenc
   ybot = min(Inputs[ , FromIterate:ToIterate],Outputs[, FromIterate:ToIterate])
 
   for (i in FromIterate:ToIterate){
-    if (is.null(ConvergenceVector)) { Title = paste0("Fixed Point Convergence. Iterate:", i, ".")} else {Title = paste0("Fixed Point Convergence. Iterate:", i, ". Convergence: ", NicePrint(ConvergenceVector[i],ConvergenceSigFig))}
+    if (is.null(ConvergenceVector)) {
+      Title = paste0("Fixed Point Convergence. Iterate:", i, ".")
+    } else {
+      Title = paste0("Fixed Point Convergence. Iterate:", i, ". Convergence: ", NicePrint(ConvergenceVector[i],ConvergenceSigFig))
+    }
 
-    if (ShowPrevious){graphics::plot(c(min(xaxis), max(xaxis)), c(ytop, ybot), type = "p", col = 0, xlab = "", ylab = ylab, main = Title, sub = "The previous iterate is represented by the open circles.")
+    if (ShowPrevious){graphics::plot(c(min(xaxis), max(xaxis)), c(ytop, ybot), type = "p", col = 0, xlab = "", ylab = ylab, main = Title,
+                                     sub = "The previous iterate is represented by the open circles.")
     } else {graphics::plot(c(min(xaxis), max(xaxis)), c(ytop, ybot), type = "p", col = 0, xlab = "", ylab = ylab, main = Title)}
     if (ShowInputs){graphics::points(xaxis, Inputs[,i], type = "p", pch = 19, col = "red")}
     if (ShowOutputs){graphics::points(xaxis, Outputs[,i], type = "p", pch = 19, col = "blue")}
@@ -84,13 +92,16 @@ ChangePerIterate = function(Inputs, Outputs, ConvergenceVector = c(), Convergenc
 #' Differences = A$Inputs - A$Outputs
 #' Convergence = apply(Differences,2,function(x){median(abs(x))})
 #' ConvergenceFig(A$Inputs, A$Outputs, Convergence, LinesToDraw = "Input_Convergence")
-ConvergenceFig = function(Inputs, Outputs, Input_Convergence = c(), LinesToDraw = c("Sup_Norm", "Euclidean_Norm","Sum_Of_Absolute_Value_Of_Residuals", "Smallest_Residual"), LogScale = TRUE, FromIterate = 1, ToIterate = c()){
+ConvergenceFig = function(Inputs, Outputs, Input_Convergence = c(), LinesToDraw = c("Sup_Norm", "Euclidean_Norm","Sum_Of_Absolute_Value_Of_Residuals", "Smallest_Residual"),
+                          LogScale = TRUE, FromIterate = 1, ToIterate = c()){
   if (!is.null(Input_Convergence)){
     if (sum(dim(Inputs) != dim(Outputs)) > 0.5 | dim(Inputs)[2] != length(Input_Convergence)) {
-      stop("The matrix of outputs and the matrix of inputs do not have the same shape. They must also have the same width as the length of the ConvergenceVector. As there are some differences in this case nothing can be drawn.")}
+      stop("The matrix of outputs and the matrix of inputs do not have the same shape. They must also have the same width as the length of
+           the ConvergenceVector. As there are some differences in this case nothing can be drawn.")}
   } else {
     if (sum(dim(Inputs) != dim(Outputs)) > 0.5) {
-      stop("The matrix of outputs and the matrix of inputs do not have the same shape. They must also have the same width as the length of the ConvergenceVector. As there are some differences in this case nothing can be drawn.")}
+      stop("The matrix of outputs and the matrix of inputs do not have the same shape. They must also have the same width as the length of
+           the ConvergenceVector. As there are some differences in this case nothing can be drawn.")}
   }
 
   Lines = list()
@@ -129,9 +140,11 @@ ConvergenceFig = function(Inputs, Outputs, Input_Convergence = c(), LinesToDraw 
   }
 
   if (LogScale){
-    graphics::plot(c(min(xaxis), max(xaxis)), c(ytop, ybot), type = "p", col = 0, xlab = "", ylab = "log(1+Convergence)", main = "Convergence per Iteration", sub = Subtitle, log = "y")
+    graphics::plot(c(min(xaxis), max(xaxis)), c(ytop, ybot), type = "p", col = 0, xlab = "", ylab = "log(1+Convergence)",
+                   main = "Convergence per Iteration", sub = Subtitle, log = "y")
   } else {
-    graphics::plot(c(min(xaxis), max(xaxis)), c(ytop, ybot), type = "p", col = 0, xlab = "", ylab = "Convergence", main = "Convergence per Iteration", sub = Subtitle)
+    graphics::plot(c(min(xaxis), max(xaxis)), c(ytop, ybot), type = "p", col = 0, xlab = "", ylab = "Convergence",
+                   main = "Convergence per Iteration", sub = Subtitle)
   }
   for (line in 1:length(LinesToDraw)){
     if (LogScale){

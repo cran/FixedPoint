@@ -43,10 +43,10 @@ Test_Of_Convergence = function(Inputs = StartVector, Outputs = c(), Method = c("
 }
 
 test_that("Testing that each method converges in the quadratic case to within tolerance", {
-  expect_true(Test_Of_Convergence(Method = "Anderson")$Convergence) # This takes 26  iterations.
+  expect_true(Test_Of_Convergence(Method = "Anderson")$Convergence)  # This takes 26  iterations.
   #expect_true(Test_Of_Convergence(Method = "Simple")$Convergence)   # This takes 221 iterations and will not normally be run
   #expect_true(Test_Of_Convergence(Method = "Aitken")$Convergence)   # This takes 323 iterations and will not normally be run
-  #expect_true(Test_Of_Convergence(Method = "Newton")$Convergence)  # Does not converge.
+  #expect_true(Test_Of_Convergence(Method = "Newton")$Convergence)   # Does not converge
   #expect_true(Test_Of_Convergence(Method = "VEA")$Convergence)      # This takes 150 iterations and will not normally be run
   #expect_true(Test_Of_Convergence(Method = "SEA")$Convergence)      # This takes 221 iterations and will not normally be run
   #expect_true(Test_Of_Convergence(Method = "MPE")$Convergence)      # This takes 44  iterations and will not normally be run

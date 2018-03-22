@@ -2,20 +2,17 @@
 library(FixedPoint)
 SequenceFunction = function(tn){0.5*(tn + 100/tn)}
 
-Simple   = FixedPoint(Function=SequenceFunction,Inputs = 6,  Method = "Simple")
-# or to accelerate with the Newton method:
-Newton   = FixedPoint(Function=SequenceFunction,Inputs = 6,  Method = "Newton")
+FP_Simple   = FixedPoint(Function=SequenceFunction,Inputs = 6,  Method = "Simple")
 
 ## ---- fig.show='hold', fig.width=7, fig.height=4.5-----------------------
 NumbersVector = 1:100
 SequenceFunction = function(tn){0.5*(tn + NumbersVector/tn)}
-Aitken   = FixedPoint(Function = SequenceFunction, Inputs = 1:100,  Method = "Aitken")
-SEA   = FixedPoint(Function = SequenceFunction, Inputs = 1:100,  Method = "SEA")
+FP_SEA   = FixedPoint(Function = SequenceFunction, Inputs = 1:100,  Method = "RRE")
 
 ## ---- fig.show='hold', fig.width=7, fig.height=4.5-----------------------
 SimpleVectorFunction = function(x){c(0.5*sqrt(abs(x[1] + x[2])), 1.5*x[1] + 0.5*x[2])}
-Simple = FixedPoint(Function = SimpleVectorFunction, Inputs = c(0.3,900), Method = "Simple")
-Anderson = FixedPoint(Function = SimpleVectorFunction, Inputs = c(0.3,900), Method = "Anderson")
+FP_Simple = FixedPoint(Function = SimpleVectorFunction, Inputs = c(0.3,900), Method = "Simple")
+FP_Anderson = FixedPoint(Function = SimpleVectorFunction, Inputs = c(0.3,900), Method = "Anderson")
 
 ## ---- fig.show='hold', fig.width=7, fig.height=4.5-----------------------
 Run1 = FixedPoint(Function = function(x){x^0.2}, Inputs = c(0.3, 0.4,0.5),
@@ -48,7 +45,7 @@ ConvergenceFig(FPSolution$Inputs, FPSolution$Outputs, FPSolution$Convergence)
 ChangePerIterate(FPSolution$Inputs, FPSolution$Outputs, FPSolution$Convergence, 
                  FromIterate = 2, ToIterate = 2, secondhold = -1)
 # Sometimes there is something more meaningful than the vector index to put on the x axis
-# in the ChangePerIterate plot. The consumers's budget in the consumption smoothing case 
+# in the ChangePerIterate plot. The consumer's budget in the consumption smoothing case 
 # is a good example. In these cases we can add them to the xaxis argument of the function.
 # For instance we can add xaxis = StretchFactor in this case and we get the third figure 
 # below:
@@ -134,12 +131,65 @@ IterateOnce = function(Price){
 InitialGuess = rep(1,10)
 FPSolution = FixedPoint(Function = IterateOnce, Inputs =  InitialGuess, Method = "VEA")
 
+## ---- fig.show='hold', fig.width=7, fig.height=4.5-----------------------
+# Generating linearly seperable data
+set.seed(10)
+data = data.frame("x1" = rnorm(100,4,2), "x2" = rnorm(100,8,2), y = -1)
+data = rbind(data,  data.frame("x1" = rnorm(100,-4,2), "x2" = rnorm(100,12), y = 1)  )
+
+# Iterating training of Perceptron
+IteratePerceptronWeights = function(w, LearningRate = 1){
+  intSeq = 1:length(data[,"y"])
+  for (i in intSeq){
+    target = data[i,c("y")]
+    score  =  w[1] + (w[2]*data[i, "x1"]) + (w[3]*data[i, "x2"])
+    ypred  = 2*(as.numeric( score > 0 )-0.5)
+    update = LearningRate * 0.5*(target-ypred)
+    w[1]   = w[1] + update
+    w[2]   = w[2] + update*data[i, "x1"]
+    w[3]   = w[3] + update*data[i, "x2"]
+  }
+  return(w)
+}
+
+plotLine = function(w){
+  xrange = seq(-10,10,length.out = 100)
+  yrange = -(w[2]/w[3])[[1]] * xrange - w[1]/w[3]
+  plot(data$x1, data$x2, col = data$y+2)
+  lines(xrange, yrange)
+}
+
+
+InitialGuess = c(1,1,1)
+FP = FixedPoint(Function = IteratePerceptronWeights, Inputs =  InitialGuess,
+                Method = "Simple", MaxIter = 1200)
+plotLine(FP$FixedPoint)
+
+## ---- fig.show='hold', fig.width=7, fig.height=4.5-----------------------
+IteratePerceptronWeights = function(w, LearningRate = 1){
+  intSeq = 1:length(data[,"y"])
+  for (i in intSeq){
+    target = data[i,c("y")]
+    score  =  w[1] + (w[2]*data[i, "x1"]) + (w[3]*data[i, "x2"])
+    ypred  = 2*(as.numeric( score > 0 )-0.5)
+    if ((target-ypred) != 0){
+      update = LearningRate * -sign(score) * sqrt(abs(score))
+      w[1] = w[1] + update
+      w[2] = w[2] + update*data[i, "x1"]
+      w[3] = w[3] + update*data[i, "x2"]
+    }
+  }
+  return(w)
+}
+
+FP = FixedPoint(Function = IteratePerceptronWeights, Inputs =  InitialGuess, Method = "MPE")
+
 ## ---- fig.show='hold', fig.width=10, fig.height=4.5----------------------
 d = 0.05
 sigma = 0.1
-alpha = 2
+alpha = 4
 S = 10
-chi = 1
+chi = 0
 p = (exp(d) - exp(-sigma) ) / (exp(sigma) - exp(-sigma))
 
 # Initially lets guess the value decreases linearly from S (when current price is 0) to

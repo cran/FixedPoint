@@ -3,16 +3,17 @@
 \name{FixedPointNewInput}
 \alias{FixedPointNewInput}
 \title{FixedPointNewInput
-This function takes the previous inputs and outputs from the FixedPoint function and determines what vector to try next in seeking a fixed point.}
+This function takes the previous inputs and outputs from the FixedPoint function and determines what vector to try next in seeking
+a fixed point.}
 \usage{
 FixedPointNewInput(Inputs, Outputs, Method = "Anderson", MaxM = 10,
-  SimpleStartIndex = 1, ExtrapolationPeriod = 1, Dampening = 1,
+  SimpleStartIndex = 1, ExtrapolationPeriod = 7, Dampening = 1,
   ConditionNumberThreshold = 1000, PrintReports = FALSE)
 }
 \arguments{
-\item{Inputs}{This is an N x A matrix of previous inputs for which corresponding outputs are available. In this case N is the dimensionality of the fixed
-point vector that is being sought (Hence each column is a matrix that is input to the "Function") and A is the number of previous Inputs/Outputs that are
-being provided to the fixed point.}
+\item{Inputs}{This is an N x A matrix of previous inputs for which corresponding outputs are available. In this case N is the
+dimensionality of the fixed point vector that is being sought (Hence each column is a matrix that is input to the "Function") and A
+is the number of previous Inputs/Outputs that are being provided to the fixed point.}
 
 \item{Outputs}{This is a matrix of Function values for the each column of the "Inputs" matrix.}
 
@@ -20,17 +21,17 @@ being provided to the fixed point.}
 
 \item{MaxM}{This is the number of saved iterates that are used in the Anderson algorithm. This has no role if another method is used.}
 
-\item{SimpleStartIndex}{This is the index for what column in the input/output matrices did the algorithm start doing simple iterates without jumps.
-This is used for all methods except the simple and Anderson methods where it has no effect.}
+\item{SimpleStartIndex}{This is the index for what column in the input/output matrices did the algorithm start doing simple iterates
+without jumps. This is used for all methods except the simple and Anderson methods where it has no effect.}
 
-\item{ExtrapolationPeriod}{This is the number of simple iterates to perform before extrapolating. This is used for the MPE, RRE, VEA and SEA methods and
-has no effect if another method is chosen.}
+\item{ExtrapolationPeriod}{This is the number of simple iterates to perform before extrapolating. This is used for the MPE, RRE, VEA and SEA
+methods and has no effect if another method is chosen. Where an epsilon algorithm is used this should be one plus a multiple of two, ie (3,5,7,etc).}
 
-\item{Dampening}{This is the dampening parameter. By default it is 1 which means no dampening takes place. It can also be less than 1 (indicating dampening)
-or more than 1 (indicating extrapolation).}
+\item{Dampening}{This is the dampening parameter. By default it is 1 which means no dampening takes place. It can also be less than 1
+(indicating dampening) or more than 1 (indicating extrapolation).}
 
-\item{ConditionNumberThreshold}{This is what threshold should be chosen to drop previous iterates if the matrix is ill conditioned. Only used in Anderson
-acceleration.}
+\item{ConditionNumberThreshold}{This is what threshold should be chosen to drop previous iterates if the matrix is ill conditioned.
+Only used in Anderson acceleration.}
 
 \item{PrintReports}{This is a boolean describing whether to print ongoing ConvergenceMetric values for each iterate.}
 }
@@ -39,7 +40,8 @@ A vector containing the next guess in seeking a fixed point.
 }
 \description{
 FixedPointNewInput
-This function takes the previous inputs and outputs from the FixedPoint function and determines what vector to try next in seeking a fixed point.
+This function takes the previous inputs and outputs from the FixedPoint function and determines what vector to try next in seeking
+a fixed point.
 }
 \examples{
 FPFunction = function(x){c(0.5*sqrt(abs(x[1] + x[2])), 1.5*x[1] + 0.5*x[2])}

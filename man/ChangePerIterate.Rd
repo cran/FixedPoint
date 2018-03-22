@@ -25,7 +25,8 @@ ChangePerIterate(Inputs, Outputs, ConvergenceVector = c(),
 
 \item{ShowPrevious}{A boolean describing whether to show the previous inputs/outputs in the figure.}
 
-\item{xaxis}{A vector for meaningful values corresponding to the input/output values. By default the indexes of each input/output vector are used.}
+\item{xaxis}{A vector for meaningful values corresponding to the input/output values. By default the indexes of each input/output vector
+are used.}
 
 \item{secondhold}{If this is -1 or less then all plotting happens immediately. This means that very quickly only the last iterate will be seen
 so it makes sense to do it only if FromIterate and ToIterate indicate only one iterate. If this is 0 then a user can click through each figure.
