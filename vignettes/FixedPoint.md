@@ -1,7 +1,7 @@
 ---
 title: "FixedPoint: A suite of acceleration algorithms with applications"
 author: "Stuart Baumann & Margaryta Klymak"
-date: "`r Sys.Date()`"
+date: "2018-03-27"
 output: rmarkdown::pdf_document
 bibliography: Bibliography.bib
 vignette: >
@@ -125,7 +125,8 @@ Now we will demonstrate how **FixedPoint** can be used for simple problems. For 
 $t_{n+1} = \frac{1}{2} \left[ t_n + \frac{x}{t_n} \right]$
 
 This is a fast converging and inexpensive sequence which probably makes an acceleration algorithm overkill but for sake of exposition we can implement this in **FixedPoint**. In the next code block we find the square root of 100 with the simple method:
-```{r, fig.show='hold', fig.width=7, fig.height=4.5}
+
+```r
 library(FixedPoint)
 SequenceFunction = function(tn){0.5*(tn + 100/tn)}
 
@@ -133,7 +134,8 @@ FP_Simple   = FixedPoint(Function=SequenceFunction,Inputs = 6,  Method = "Simple
 ```
 
 We can also solve for a vector of fixed points at the same time. For instance every square root from 1 to 100.
-```{r, fig.show='hold', fig.width=7, fig.height=4.5}
+
+```r
 NumbersVector = 1:100
 SequenceFunction = function(tn){0.5*(tn + NumbersVector/tn)}
 FP_SEA   = FixedPoint(Function = SequenceFunction, Inputs = 1:100,  Method = "RRE")
@@ -143,7 +145,8 @@ Note that in this case the RRE method is being applied elementwise.
 ### Vectorised functions
 
 The utility of the acceleration algorithms contained in **FixedPoint** are more apparent when applied to vectorised functions with cross dependency. For a simple example consider the below function where each entry of the vector depends on both entries of the previous iterate.
-```{r, fig.show='hold', fig.width=7, fig.height=4.5}
+
+```r
 SimpleVectorFunction = function(x){c(0.5*sqrt(abs(x[1] + x[2])), 1.5*x[1] + 0.5*x[2])}
 FP_Simple = FixedPoint(Function = SimpleVectorFunction, Inputs = c(0.3,900), Method = "Simple")
 FP_Anderson = FixedPoint(Function = SimpleVectorFunction, Inputs = c(0.3,900), Method = "Anderson")
@@ -154,12 +157,20 @@ This function takes 105 iterates to find a fixed point with the simple method bu
 ## 3.2 Easily changing algorithm
 
 A key priority in writing **FixedPoint** is for ease in changing fixed point method. The algorithm can be stopped and then restarted without having to repeat earlier iterations. This can be seen in the simple example below:
-```{r, fig.show='hold', fig.width=7, fig.height=4.5}
+
+```r
 Run1 = FixedPoint(Function = function(x){x^0.2}, Inputs = c(0.3, 0.4,0.5),
                 Method = "Aitken")
 cat(paste("Running this all at once takes ", length(Run1$Convergence), " iterations and 
           convergences to ",  Run1$Convergence[length(Run1$Convergence)], "\n"))
+```
 
+```
+## Running this all at once takes  9  iterations and 
+##           convergences to  1.11022302462516e-15
+```
+
+```r
 Run2_1 = FixedPoint(Function = function(x){x^0.2}, Inputs = c(0.3, 0.4,0.5),
                 Method = "Aitken", MaxIter = 4)
 # Check some condition about the convergence or change algorithm.
@@ -167,6 +178,11 @@ Run2_2 = FixedPoint(Function = function(x){x^0.2}, Inputs = Run2_1$Inputs,
                     Outputs = Run2_1$Outputs, Method = "Aitken")
 cat(paste("Running this with a break takes ", length(Run2_2$Convergence), " iterations and 
           convergences to ",  Run2_2$Convergence[length(Run2_2$Convergence)], "\n"))
+```
+
+```
+## Running this with a break takes  9  iterations and 
+##           convergences to  1.11022302462516e-15
 ```
 
 This can be useful in problems where it is desired to switch extrapolation methods half way through. For instance in the consumption smoothing case presented later, the Vector Epsilon Algorithm converges quickly to a convergence level around $10^{-4}$ but then spends around 100 iterations hovering around this level without reducing further. In this case the algorithm could be changed to the simple method or Anderson method once the algorithm hit some target level of convergence.
@@ -180,7 +196,8 @@ Another example is parallelisation. The Anderson method in particular is well su
 Another key priority in writing **FixedPoint** is to enable monitoring of convergence in real time. This can be useful in settings such as trying to calibrate a consumption smoothing problem where being able to diagnose and abort problems in value function iteration can save significant amounts of time. As well as printing convergence statements this package can show plots presenting convergence as the function is running.\footnote{In writing the package a conscious decision was made to exclusively use base graphics for this purpose. This is because the benefits from a lightweight package with few dependencies outweighs any benefit from more attractive plots considering the plots are not designed for publication. If more alternate plots are required however the list returned by FixedPoint will contain all of the data from previous iterates and this can be used to generate the appropriate plots.} This can be done by  adding Plots = "ConvergenceFig" or Plots = "ChangePerIterate" to the FixedPoint function. Both types of plots also have a number of optional parameters that are documented in the documentation for each plotting function.
 
 These plots can also be used after the FixedPoint function has finished running. Below we will show both plots for a simple (but clearly contrived for exposition) case:
-```{r, fig.show='hold', fig.width=7, fig.height=4.5}
+
+```r
 StretchFactor = c(1,1.1,1.2,3,3.3,3.6,7,8,9,15, 20)
 
 FPFunction = function(x){
@@ -203,8 +220,9 @@ ChangePerIterate(FPSolution$Inputs, FPSolution$Outputs, FPSolution$Convergence,
 # below:
 ChangePerIterate(FPSolution$Inputs, FPSolution$Outputs, FPSolution$Convergence,
                  FromIterate = 2, ToIterate = 2, secondhold = -1, xaxis = StretchFactor)
-
 ```
+
+![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5-1.png)![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5-2.png)![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5-3.png)
 
 ## 3.4 Graceful error handling
 
@@ -218,15 +236,51 @@ The FixedPoint function handles these situations gracefully by saving all previo
 
 This information is useful in order to diagnose the issue. In this case we might decide to modify the function to insert the absolute value function with the reasoning that the same fixed point will likely result (which we could later verify). This also allows a user to run one method until an error occurs and then switch methods. This is demonstrated below.
 
-```{r, fig.show='hold', fig.width=7, fig.height=4.5}
+
+```r
 SimpleVectorFunction = function(x){c(0.5*sqrt(x[1] + x[2]), 1.5*x[1] + 0.5*x[2])}
 FPSolution = FixedPoint(Function = SimpleVectorFunction, Inputs = c(0.3,900),
                         Method = "Anderson")
+```
+
+```
+## Warning in sqrt(x[1] + x[2]): NaNs produced
+```
+
+```r
 # We can see the output of the FixedPoint function in cases like this where it ends due
 # to an error
 FPSolution
+```
 
+```
+## $Inputs
+##       [,1]     [,2]      [,3]     [,4]
+## [1,]   0.3  15.0025  7.350817 3.191655
+## [2,] 900.0 450.4500 82.469248 9.574966
+## 
+## $Outputs
+##          [,1]      [,2]      [,3]     [,4]
+## [1,]  15.0025  10.78717  4.738672 1.786520
+## [2,] 450.4500 247.72875 52.260849 9.574966
+## 
+## $Convergence
+## [1] 449.550000 202.721250  30.208399   1.405135
+## 
+## $FixedPoint
+## [1] NA
+## 
+## $Finish
+## [1] "New output vector contains NAs"
+## 
+## $NewInputVector
+## [1] -1.085113 -3.255338
+## 
+## $NewOutputVector
+## [1]       NaN -3.255338
+```
 
+```r
 # We can use this information to decide to switch to the simple method.
 # No error results as the simple method doesn't extrapolate.
 FPSolution = FixedPoint(Function = SimpleVectorFunction, Inputs = FPSolution$Inputs, 
@@ -272,7 +326,8 @@ For our first real-world example consider we want to model the diffusion of gas 
 
 [^6]: Each corner square has two contiguous squares, each perimeter square borders three and each interior square borders four.
 
-```{r, fig.show='hold', fig.width=10, fig.height=4.5}
+
+```r
 phi = 10
 Numbering = matrix(seq(1,phi^2,1), phi) # Numbering scheme for squares.
 
@@ -298,7 +353,6 @@ TwoDimensionalDiffusionIteration = function(x, phi){
 
 FPSolution = FixedPoint(Function = function(x) TwoDimensionalDiffusionIteration(x, phi),
                Inputs =  c(rep(0,50), rep(1,50)), Method = "RRE")
-
 ```
 
 ## 4.2 Finding equilibrium prices in a pure exchange economy
@@ -339,7 +393,8 @@ $P_i = \frac{\sum_{n=1}^G e_{n,i}}{\sum_{n=1}^G \frac{\gamma_{n,i}}{\lambda_n} }
 
 We use this approach in the code below for the case of 10 goods with 8 households. For exposition sake we generate some data below before proceeding to find the equilibrium price vector.
 
-```{r, fig.show='hold', fig.width=7, fig.height=4.5}
+
+```r
 # Generating data
 set.seed(3112)
 N = 8
@@ -399,7 +454,8 @@ the data is not linearly separable in which case there may be no fixed point and
 
 The acceleration methods of **FixedPoint** perform poorly in accelerating the convergence of this perceptron training algorithm. This is due to the perceptron often converging by a fixed increment. This occurs because multiple iterates can result in the same observations being misclassified and hence the same change in the weights. As a result we will use the simple method which is guaranteed to be convergent for this problem (@Novikoff1963).
 
-```{r, fig.show='hold', fig.width=7, fig.height=4.5}
+
+```r
 # Generating linearly seperable data
 set.seed(10)
 data = data.frame("x1" = rnorm(100,4,2), "x2" = rnorm(100,8,2), y = -1)
@@ -434,11 +490,14 @@ FP = FixedPoint(Function = IteratePerceptronWeights, Inputs =  InitialGuess,
 plotLine(FP$FixedPoint)
 ```
 
+![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-9-1.png)
+
 Only the simple method is convergent here and it is relatively slow taking 1121 iterations. We can still get a benefit from acceleration however if we can modify the training algorithm to give training increments that change depending on distance from the fixedpoint. This can be done by updating the weights by an amount proportional to a concave function of the norm of $wx+b$.
 This is done in the next piece of code where the MPE method is used. It can be seen that there is a substantial increase in speed with only 54 iterations required with the MPE method.
 
 
-```{r, fig.show='hold', fig.width=7, fig.height=4.5}
+
+```r
 IteratePerceptronWeights = function(w, LearningRate = 1){
   intSeq = 1:length(data[,"y"])
   for (i in intSeq){
@@ -478,7 +537,8 @@ $p = \frac{e^{d} - e^{-\sigma}}{e^{\sigma} - e^{-\sigma}}$
 
 This can be solved by means of a fixed point algorithm as shown below:
 
-```{r, fig.show='hold', fig.width=10, fig.height=4.5}
+
+```r
 d = 0.05
 sigma = 0.1
 alpha = 4
@@ -540,10 +600,25 @@ $\bar{x}(B_t, \epsilon_t) = \text{argmax}_{0 < x < B_t} \hspace{0.5cm} \epsilon_
 So this problem reduces to finding the vector of function values at a discrete number of points, $\bar{f}$. This can be done as a fixed point problem. We can first note that this problem is a contraction mapping problem. In this particular example this means that if we define a sequence $\bar{f}_0 = f_0$ where $f_0$ is some initial guess and $f_i = g(f_{i-1})$ where $g$ is given by the IterateOnce function below then this sequence will be convergent. Convergence would be slow however so below we will actually use the Anderson method:
 
 
-```{r, fig.show='hold', fig.width=10, fig.height=4.5}
+
+```r
 library(FixedPoint)
 library(schumaker)
+```
+
+```
+## Warning: package 'schumaker' was built under R version 3.4.4
+```
+
+```r
 library(cubature)
+```
+
+```
+## Warning: package 'cubature' was built under R version 3.4.4
+```
+
+```r
 delta = 0.2
 beta = 0.9
 BudgetStateSpace = c(seq(0,1, 0.015), seq(1.05,3,0.05))
@@ -574,7 +649,6 @@ IterateOnce = function(BudgetValues){
   return(BudgetValues)
 }
 FPSolution = FixedPoint(Function = IterateOnce,Inputs = InitialGuess,Method = c("Anderson"))
-
 ```
 
 This takes 16 iterates which is drastically better than the 459 iterates it takes with the simple method.
@@ -583,10 +657,32 @@ This takes 16 iterates which is drastically better than the 459 iterates it take
 
 We might want to get it going even faster however though parallelisation. The easiest way to do this for this problem is to parallelise the for loop through the budgetspace. For exposition however we will show how to do this by doing multiple iterates at the same time. We will do this by using 2 cores. Each will produce an new guess vector utilising a different subset of previous iterates. The first core will have all previous iterates with the other core missing the second best previous iterates. 
 
-```{r, fig.show='hold', fig.width=7, fig.height=4.5}
-library(foreach)
-library(doParallel)
 
+```r
+library(foreach)
+```
+
+```
+## Warning: package 'foreach' was built under R version 3.4.4
+```
+
+```r
+library(doParallel)
+```
+
+```
+## Warning: package 'doParallel' was built under R version 3.4.4
+```
+
+```
+## Loading required package: iterators
+```
+
+```
+## Loading required package: parallel
+```
+
+```r
 TaskAssigner = function(Inputs, Outputs, i, Function){
   library(FixedPoint) 
   library(schumaker)
@@ -664,7 +760,6 @@ while (iter < 100 & ConvergenceVal > 1e-10){
 stopImplicitCluster()
 
 PreviousRuns$FixedPoint = PreviousRuns$Outputs[, dim(PreviousRuns$Outputs)[2]]
-
 ```
 
 This takes 28 iterates which takes approximately the same time as running $2 + \frac{26}{2} = 15$ iterates sequentially. This is not a significant speedup compared to the 16 iterates it takes running the algorithm sequentially indicating that it is probably not worth the effort. The parallel algorithm may be better at other problems however. It is likely to be more effective if more than 2 cores are used. The parallel algorithm may also be able to be modified for better performance, for instance different methods could be used in each core or the dampening parameter could be modified. 

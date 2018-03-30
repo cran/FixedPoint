@@ -10,7 +10,7 @@ Test_Of_Convergence = function(Function = SequenceFunction, Inputs = c(6), Outpu
   return((A$Convergence[length(A$Convergence)] < ConvergenceMetricThreshold))
 }
 
-test_that("Testing that each method converges in the cos(x)  case to within tolerance", {
+test_that("Testing that each method converges in the Babylonian square root case to within tolerance", {
   expect_true(Test_Of_Convergence(Method = "Anderson")) # This takes 7  iterations.
   expect_true(Test_Of_Convergence(Method = "Simple"))   # This takes 6  iterations.
   expect_true(Test_Of_Convergence(Method = "Aitken"))   # This takes 7  iterations.

@@ -27,7 +27,7 @@
 #' ChangePerIterate(A$Inputs, A$Outputs, A$Convergence, secondhold = 0.5, FromIterate = 9)
 ChangePerIterate = function(Inputs, Outputs, ConvergenceVector = c(), ConvergenceSigFig = 5, ShowInputs = TRUE, ShowOutputs = TRUE,
                             ShowPrevious  = TRUE, xaxis = c(), secondhold = 0, FromIterate = 1, ToIterate = c()){
-
+  # Input checking
   if (ShowInputs + ShowOutputs < 0.5){stop("It is not possible to use this function without showing inputs or outputs (as nothing will be drawn).
                                            Set ShowInputs and/or ShowOutputs to TRUE.")}
   if (ShowInputs){ylab = "Inputs (in red)."}
@@ -36,27 +36,30 @@ ChangePerIterate = function(Inputs, Outputs, ConvergenceVector = c(), Convergenc
 
   if (is.null(xaxis)){xaxis = 1:dim(Inputs)[1]}
   if (is.null(ToIterate)){ToIterate = dim(Inputs)[2]}
-
+  # Limits of the figure
   ytop = max(Inputs[ , FromIterate:ToIterate],Outputs[, FromIterate:ToIterate])
   ybot = min(Inputs[ , FromIterate:ToIterate],Outputs[, FromIterate:ToIterate])
 
   for (i in FromIterate:ToIterate){
+    # Drawing basic figure with labels.
     if (is.null(ConvergenceVector)) {
       Title = paste0("Fixed Point Convergence. Iterate:", i, ".")
     } else {
-      Title = paste0("Fixed Point Convergence. Iterate:", i, ". Convergence: ", NicePrint(ConvergenceVector[i],ConvergenceSigFig))
+      Title = paste0("Fixed Point Convergence. Iterate:", i, ". Convergence: ", formatC(ConvergenceVector[i],  big.interval = 1, small.interval = ConvergenceSigFig, format = "e"))
     }
-
     if (ShowPrevious){graphics::plot(c(min(xaxis), max(xaxis)), c(ytop, ybot), type = "p", col = 0, xlab = "", ylab = ylab, main = Title,
                                      sub = "The previous iterate is represented by the open circles.")
     } else {graphics::plot(c(min(xaxis), max(xaxis)), c(ytop, ybot), type = "p", col = 0, xlab = "", ylab = ylab, main = Title)}
+    # Showing current iterate.
     if (ShowInputs){graphics::points(xaxis, Inputs[,i], type = "p", pch = 19, col = "red")}
     if (ShowOutputs){graphics::points(xaxis, Outputs[,i], type = "p", pch = 19, col = "blue")}
     if (all(i>1, ShowPrevious)){
+      # Show previous iterate.
       if (ShowInputs){graphics::points(xaxis, Inputs[,i-1], type = "p", col = "red")}
       if (ShowOutputs){graphics::points(xaxis, Outputs[,i-1], type = "p", col = "blue")}
     }
 
+    # Here we have a break so that users can click through or have plots pass through at Secondhold seconds per plot.
     if (secondhold > -0.5 & secondhold <= 1e-10){
       readline(prompt=paste0("Iterate:", i, ".     Press [enter] to see next frame"))
     }
@@ -94,6 +97,7 @@ ChangePerIterate = function(Inputs, Outputs, ConvergenceVector = c(), Convergenc
 #' ConvergenceFig(A$Inputs, A$Outputs, Convergence, LinesToDraw = "Input_Convergence")
 ConvergenceFig = function(Inputs, Outputs, Input_Convergence = c(), LinesToDraw = c("Sup_Norm", "Euclidean_Norm","Sum_Of_Absolute_Value_Of_Residuals", "Smallest_Residual"),
                           LogScale = TRUE, FromIterate = 1, ToIterate = c()){
+  # Input checking.
   if (!is.null(Input_Convergence)){
     if (sum(dim(Inputs) != dim(Outputs)) > 0.5 | dim(Inputs)[2] != length(Input_Convergence)) {
       stop("The matrix of outputs and the matrix of inputs do not have the same shape. They must also have the same width as the length of
@@ -113,7 +117,7 @@ ConvergenceFig = function(Inputs, Outputs, Input_Convergence = c(), LinesToDraw 
     LinesToDraw = unique(c(LinesToDraw, "Input_Convergence"))
     Input_Convergence = Input_Convergence[xaxis]
   }
-
+  # Creating other lines to draw.
   if (sum(LinesToDraw != "ConvergenceVector")>0.5){
     ResidualVector = Outputs - Inputs
     Lines$Sup_Norm = apply(ResidualVector , 2, function(x) {max(abs(x))}   )
@@ -124,10 +128,9 @@ ConvergenceFig = function(Inputs, Outputs, Input_Convergence = c(), LinesToDraw 
     Lines = Lines[LinesToDraw]
   }
   Unlisting = unlist(Lines)
+  # Generating plot
   ytop = max(Unlisting)
   if (LogScale){ybot = 1e-16} else {ybot = 0}
-
-
   colours = c("black", "blue", "green", "red", "brown")
   Subtitle = paste0(LinesToDraw[1]," in ", colours[1])
   if ( length(LinesToDraw) > 1.5){
@@ -138,7 +141,6 @@ ConvergenceFig = function(Inputs, Outputs, Input_Convergence = c(), LinesToDraw 
       if (i %% 2 == 0 & i < length(LinesToDraw)){Subtitle = paste0(Subtitle, "," , "\n")}
     }
   }
-
   if (LogScale){
     graphics::plot(c(min(xaxis), max(xaxis)), c(ytop, ybot), type = "p", col = 0, xlab = "", ylab = "log(1+Convergence)",
                    main = "Convergence per Iteration", sub = Subtitle, log = "y")
@@ -146,6 +148,7 @@ ConvergenceFig = function(Inputs, Outputs, Input_Convergence = c(), LinesToDraw 
     graphics::plot(c(min(xaxis), max(xaxis)), c(ytop, ybot), type = "p", col = 0, xlab = "", ylab = "Convergence",
                    main = "Convergence per Iteration", sub = Subtitle)
   }
+  # Adding on lines to plot
   for (line in 1:length(LinesToDraw)){
     if (LogScale){
       graphics::lines(xaxis, log(1+Lines[LinesToDraw[line]][[1]]), type = "l", col = colours[line] )

@@ -22,11 +22,11 @@ Section 4 then presents several applications of these fixed point algorithms in 
 
 # 1 Fixed point acceleration
 
-A fixed point problem is one where we look for a vector, $\hat{x}$, so that for a given function $f$:
+A fixed point problem is one where we look for a vector, $\hat{X} \in \Re^N$, so that for a given function $f: \Re^N \rightarrow \Re^N$ we have:
 
-$f(\hat{x}) = \hat{x}$
+$$f(\hat{X}) = \hat{X}$$
 
-If $f: N^1 \rightarrow N^1$ and thus $x$ is a scalar then one way to solve this problem would be to use a rootfinder on the function $g(x) = f(x) - x$ or to use an optimiser to minimise $h(x) = (f(x) - x)^2$. These techniques will not generally work however if $f : N^a \rightarrow N^a$ where $a$ is large. Consider for instance using a multidimensional Newtonian optimiser to minimise $h(x) = (f(x) - x)^2$. The estimation of gradients for each individual dimension may take an infeasibly long time. In addition this method may not make use all available information. Consider for instance that we know that the solution for $x$ will be an increasing vector (so $x_i > x_j$ for any entries of $x$  with $i > j$) but has many entries. This information can be preserved and used in the vector acceleration algorithms that we present but would be more difficult to exploit in a standard optimisation algorithm.
+If $f: \Re^1 \rightarrow \Re^1$ and thus any solution $\hat{X}$ will be a scalar then one way to solve this problem would be to use a rootfinder on the function $g(x) = f(x) - x$ or to use an optimiser to minimise $h(x) = (f(x) - x)^2$. These techniques will not generally work however if $f : N^a \rightarrow N^a$ where $a$ is large. Consider for instance using a multidimensional Newtonian optimiser to minimise $h(x) = (f(x) - x)^2$. The estimation of gradients for each individual dimension may take an infeasibly long time. In addition this method may not make use all available information. Consider for instance that we know that the solution for $x$ will be an increasing vector (so $x_i > x_j$ for any entries of $x$  with $i > j$) but has many entries. This information can be preserved and used in the vector acceleration algorithms that we present but would be more difficult to exploit in a standard optimisation algorithm.
 
 **FixedPoint** implements eight algorithms for finding fixed points. The first algorithm implemented in this package is the "simple" method which merely takes the output of a function and feeds it back into the function. For instance starting with a guess of $x_0$, the next guess will be $x_1 = f(x_0)$. The guess after that will be $x_2 = f(x_1)$ and so on. In some conditions $f$ will be a contraction mapping and so the simple method will be guaranteed to converge to a unique fixed point [@StokeyLucasPrescott1989]. Even when this is the case however the simple method may only converge slowly which can be inconvenient. The other seven methods this package implements are designed to be faster than the simple method but may not be convergent for every problem. 
 
@@ -42,7 +42,7 @@ $x_{i+1} = x_i - \frac{g(x_i)}{g^\prime(x_i)}$
 
 $x_{i+1} = x_i - \frac{g(x_i)}{  \frac{ g(x_i) - g(x_{i-1})}{x_i-x_{i-1}}      }$
 
-The implementation of the Newton method in this package uses this formula to predict the fixed point given two previous iterates.[^1] This method is designed for use with scalar functions. If it is used with higher dimensional functions that take and return vectors then it will be used elementwise. For vector elements for which $g(x_i) = g(x_{i-1})$ and the derivative is zero **FixedPoint** will substitute in the corresponding value from a simple iterate.
+The implementation of the Newton method in this package uses this formula to predict the fixed point given two previous iterates.[^1] This method is designed for use with scalar functions.
 
 [^1]: Only two rather than three are required because we can use $x_{i+1} = f(x_i)$ and $x_{i+2} = f(x_{i+1})$.
 
@@ -60,7 +60,6 @@ This above expression can be simply rearranged to give a formula predicting the 
 $x_{i+1} = x_{i} - \frac{  (x_{i+1} - x_i)^2  }{  x_{i+2} - 2x_{i+1} + x_i}$
 
 The implementation of the Aitken method in **FixedPoint** uses this formula to predict the fixed point given two previous iterates. This method is designed for use with scalar functions. If it is used with higher dimensional functions that take and return vectors then it will be used elementwise. 
-For vector elements for which $x_{i+2} - 2x_{i+1} + x_i = 0$  and there is division by zero **FixedPoint** will substitute in the corresponding value from a simple iterate.
 
 ## 2.3 Epsilon algorithms
 
@@ -178,7 +177,7 @@ Another example is parallelisation. The Anderson method in particular is well su
 
 ## 3.3 Algorithm monitoring
 
-Another key priority in writing **FixedPoint** is to enable monitoring of convergence in real time. This can be useful in settings such as trying to calibrate a consumption smoothing problem where being able to diagnose and abort problems in value function iteration can save significant amounts of time. As well as printing convergence statements this package can show plots presenting convergence as the function is running. This can be done by  adding Plots = "ConvergenceFig" or Plots = "ChangePerIterate" to the FixedPoint function. Both types of plots also have a number of optional parameters that are documented in the documentation for each plotting function.
+Another key priority in writing **FixedPoint** is to enable monitoring of convergence in real time. This can be useful in settings such as trying to calibrate a consumption smoothing problem where being able to diagnose and abort problems in value function iteration can save significant amounts of time. As well as printing convergence statements this package can show plots presenting convergence as the function is running.\footnote{In writing the package a conscious decision was made to exclusively use base graphics for this purpose. This is because the benefits from a lightweight package with few dependencies outweighs any benefit from more attractive plots considering the plots are not designed for publication. If more alternate plots are required however the list returned by FixedPoint will contain all of the data from previous iterates and this can be used to generate the appropriate plots.} This can be done by  adding Plots = "ConvergenceFig" or Plots = "ChangePerIterate" to the FixedPoint function. Both types of plots also have a number of optional parameters that are documented in the documentation for each plotting function.
 
 These plots can also be used after the FixedPoint function has finished running. Below we will show both plots for a simple (but clearly contrived for exposition) case:
 ```{r, fig.show='hold', fig.width=7, fig.height=4.5}
@@ -209,7 +208,11 @@ ChangePerIterate(FPSolution$Inputs, FPSolution$Outputs, FPSolution$Convergence,
 
 ## 3.4 Graceful error handling
 
-Hopefully **FixedPoint** is well tested enough that most kind of errors will be rare. Errors are likely however in cases where inputs functions have a restricted domain. For example this may include functions that require the input vector to have a particular shape (ie concavity) or functions where the input vector must be strictly positive. For a simple example consider the vectorised function we introduced in section 3.1. Now rather than $x^1_t = \frac{\sqrt{\vert x^1_{t-1} + x^2_{t-1} \vert}}{2}$ we have $x^1_t = \frac{\sqrt{x^1_{t-1} + x^2_{t-1}}}{2}$. This is no longer real valued if the sum of the previous iterate is negative. This is what occurs in the 5th iterate of the Anderson method applied to this problem.
+Hopefully **FixedPoint** is well tested enough that most kind of errors will be rare. **FixedPoint** also offers an option (``ReplaceInvalids'') to ensure that no acceleration algorithm generates guess vectors that contain NAs or Infs. This option can be set to ``ReplaceVector''  which will replace an extrapolated vector containing NAs or Infs by the vector output in the previous iterate. If it is set to ``ReplaceElement'' then it will replace the individual elements that are NA or Inf by the corresponding elements in the output of the previous iterate.[^15]
+
+[^15]: With these options being set the **FixedPoint** should never throw an error when applied to a function which is guaranteed to map: $\Re^N \rightarrow \Re^N$ for some $N$ unless the error comes from underflow or overflow. If you do encounter such a testcase it likely reflects a bug, we would much appreciate it if you could send a minimal working example to the package maintainer.
+
+Errors are likely however in cases where inputs functions have a restricted domain. For example this may include functions that require the input vector to have a particular shape (ie concavity) or functions where the input vector must be strictly positive. For a simple example consider the vectorised function we introduced in section 3.1. Now rather than $x^\prime[1] = \frac{\sqrt{\vert x[1] + x[2] \vert}}{2}$ we have $x^\prime[1] = \frac{\sqrt{ x[1] + x[2] }}{2}$ where the output x has a prime and the inputs has no prime symbol. $x^\prime[1]$ here is no longer real valued if the sum of the previous iterate is negative. This is what occurs in the 5th iterate of the Anderson method applied to this problem.
 
 The FixedPoint function handles these situations gracefully by saving all previous results as well as the proposed new vector that lead to the error. In these cases the "Finish" message in the output describes the form of error, the "NewInputVector" list entry contains the attempted vector that was input to the function and the "NewOutputVector" list entry contains the result of applying the function to NewInputVector. This output information can be seen in the example below. 
 
@@ -234,6 +237,8 @@ FPSolution = FixedPoint(Function = SimpleVectorFunction, Inputs = FPSolution$Inp
                         Outputs = FPSolution$Outputs, Method = "Anderson")
 ```
 
+
+
 ## 3.5 Convergence by constant increments
 
 Most of the methods included in this function will fail in finding the fixed point of a function that converges by a fixed increment. 
@@ -255,8 +260,9 @@ In these cases it may be possible to change the function to make it converge by 
 same set of fixed points. This is shown in the perceptron example in section 4.3. In other cases where it is not possible
 to modify the function, it is advisable to use the simple method.
 
-[^5]: When these complications arise the Newton method and the Aitken method will revert to using the simple method to create
-a new guess for the fixed point. A warning will be emitted to inform the user of this. 
+[^5]: When these complications arise the ReplaceInvalids method can be used to revert to a simple iterate or to change individual elements to the corresponding values in a simple iterate. This is as described in section 3.4.
+
+
 
 # 4. Applications of fixed point acceleration
 

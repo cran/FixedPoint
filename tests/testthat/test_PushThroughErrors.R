@@ -8,7 +8,7 @@ Test_Of_GracefulError = function(Function = function(x){c(0.5*sqrt((x[1] + x[2])
 }
 
 test_that("Testing Graceful Errors", {
-  expect_true(Test_Of_GracefulError(Method = "Anderson")) # This takes 12  iterations.
+  expect_true(Test_Of_GracefulError(Method = "Anderson"))
 })
 
 
