@@ -1,5 +1,6 @@
 library(FixedPoint)
 library(testthat)
+library(SQUAREM)
 library(schumaker)
 library(cubature)
 delta = 0.2
@@ -28,16 +29,16 @@ OneIterateBudgetValues = function(BudgetValues){
 }
 #A = FixedPoint(OneIterateBudgetValues, InitialGuess, Method = c("Simple"))
 
-Test_Of_Convergence = function(Function = OneIterateBudgetValues, Inputs = InitialGuess, Outputs = c(), Method = c("Newton") , ConvergenceMetric  = function(Resids){max(abs(Resids))} , ConvergenceMetricThreshold = 1e-10, MaxIter = 1e3, MaxM = 10, Dampening = 1, PrintReports = TRUE, ReportingSigFig = 5, ConditionNumberThreshold = 1e10,   ChangePerIteratexaxis = BudgetStateSpace, ConvergenceFigLags = 5){
+Test_Of_Convergence = function(Function = OneIterateBudgetValues, Inputs = InitialGuess, Outputs = c(), Method = c("Newton") , ConvergenceMetric  = function(Resids){max(abs(Resids))} , ConvergenceMetricThreshold = 1e-10, MaxIter = 1e3, MaxM = 10, Dampening = 1, PrintReports = FALSE, ReportingSigFig = 5, ConditionNumberThreshold = 1e10,   ChangePerIteratexaxis = BudgetStateSpace, ConvergenceFigLags = 5){
 
   A = FixedPoint(Function = Function, Inputs = Inputs, Outputs = Outputs, Method = Method, ConvergenceMetric = ConvergenceMetric, ConvergenceMetricThreshold = ConvergenceMetricThreshold, MaxIter = MaxIter, MaxM = MaxM, Dampening = Dampening, PrintReports = PrintReports, ReportingSigFig = ReportingSigFig, ChangePerIteratexaxis = ChangePerIteratexaxis, ConvergenceFigLags = ConvergenceFigLags)
-
+  cat(paste0("The ", Method, " method took ", length(A$Convergence), " iterations and finished with ", A$Finish, "\n"))
   return(list(Convergence = A$Convergence[length(A$Convergence)] < ConvergenceMetricThreshold, Result = A))
 }
 
 # Note this is a slow function so we only run Anderson below.
 test_that("Testing that each method converges in the quadratic case to within tolerance", {
-    expect_true(Test_Of_Convergence(Method = "Anderson")$Convergence)  # This takes 17  iterations.
+    #expect_true(Test_Of_Convergence(Method = "Anderson")$Convergence) # This takes 17  iterations.
     #expect_true(Test_Of_Convergence(Method = "Simple")$Convergence)   # This takes 459 iterations and so will not be normally run.
     #expect_true(Test_Of_Convergence(Method = "Aitken")$Convergence)   # Does not converge.
     #expect_true(Test_Of_Convergence(Method = "Newton")$Convergence)   # Does not converge.
@@ -46,3 +47,9 @@ test_that("Testing that each method converges in the quadratic case to within to
     #expect_true(Test_Of_Convergence(Method = "MPE")$Convergence)      # This takes 61  iterations and so will not be normally run.
     #expect_true(Test_Of_Convergence(Method = "RRE")$Convergence)      # This takes 97  iterations and so will not be normally run.
 })
+#Func = OneIterateBudgetValues
+#Inputs = InitialGuess
+#sqm = SQUAREM::squarem(Inputs,Func, control=list(tol= 1e-10*4 ))
+#convergence = sum(abs(sqm$par - Func(sqm$par) ))
+#acat(paste0("The squarem method took ", sqm$fpevals, " iterations and finished with convergence of ", convergence, "\n")) # This takes 93 iterations and will not normally be run.
+

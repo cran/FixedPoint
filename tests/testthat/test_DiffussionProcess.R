@@ -1,5 +1,6 @@
 library(FixedPoint)
 library(testthat)
+library(SQUAREM)
 context("Testing three convergence methods for a gas diffusion problem.")
 
 # We have squares as described in below matrix.
@@ -33,12 +34,12 @@ TwoDimensionalDiffusionIteration = function(x, SideDivision){
 }
 
 StartVector = c(rep(0,50), rep(1,50))
-Test_Of_Convergence = function(Inputs = StartVector, Outputs = c(), Method = c("Newton") , ConvergenceMetric  = function(Resids){max(abs(Resids))} , ConvergenceMetricThreshold = 1e-4, MaxIter = 1e3, MaxM = 10, Dampening = 1, PrintReports = TRUE, ReportingSigFig = 5, ConditionNumberThreshold = 1e10){
+Test_Of_Convergence = function(Inputs = StartVector, Outputs = c(), Method = c("Newton") , ConvergenceMetric  = function(Resids){max(abs(Resids))} , ConvergenceMetricThreshold = 1e-4, MaxIter = 1e3, MaxM = 10, Dampening = 1, PrintReports = FALSE, ReportingSigFig = 5, ConditionNumberThreshold = 1e10){
 
   Func = function(x){TwoDimensionalDiffusionIteration(x, SideDivision)}
 
   A = FixedPoint(Function = Func, Inputs = Inputs, Method = Method, ConvergenceMetric = ConvergenceMetric, ConvergenceMetricThreshold = ConvergenceMetricThreshold, MaxIter = MaxIter, MaxM = MaxM, Dampening = Dampening, PrintReports = PrintReports, ReportingSigFig = ReportingSigFig)
-
+  cat(paste0("The ", Method, " method took ", length(A$Convergence), " iterations and finished with ", A$Finish, "\n"))
   return(list(Convergence = A$Convergence[length(A$Convergence)] < ConvergenceMetricThreshold, Result = A))
 }
 
@@ -52,6 +53,10 @@ test_that("Testing that each method converges in the quadratic case to within to
   #expect_true(Test_Of_Convergence(Method = "MPE")$Convergence)      # This takes 44  iterations and will not normally be run
   #expect_true(Test_Of_Convergence(Method = "RRE")$Convergence)      # This takes 50  iterations and will not normally be run
 })
+Func = function(x){TwoDimensionalDiffusionIteration(x, SideDivision)}
+#sqm = SQUAREM::squarem(StartVector,Func, control=list(tol= 1e-4*4 ))
+#convergence = sum(abs(sqm$par - Func(sqm$par) ))
+#cat(paste0("The squarem method took ", sqm$fpevals, " iterations and finished with convergence of ", convergence, "\n")) # This takes 158 iterations and will not normally by run.
 
 
 #To visualise final result:

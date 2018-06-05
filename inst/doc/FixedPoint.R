@@ -134,8 +134,8 @@ FPSolution = FixedPoint(Function = IterateOnce, Inputs =  InitialGuess, Method =
 ## ---- fig.show='hold', fig.width=7, fig.height=4.5-----------------------
 # Generating linearly seperable data
 set.seed(10)
-data = data.frame("x1" = rnorm(100,4,2), "x2" = rnorm(100,8,2), y = -1)
-data = rbind(data,  data.frame("x1" = rnorm(100,-4,2), "x2" = rnorm(100,12), y = 1)  )
+data = data.frame("x1" = rnorm(10,4,2), "x2" = rnorm(10,8,2), y = -1)
+data = rbind(data,  data.frame("x1" = rnorm(10,-4,2), "x2" = rnorm(10,12), y = 1)  )
 
 # Iterating training of Perceptron
 IteratePerceptronWeights = function(w, LearningRate = 1){
@@ -229,8 +229,8 @@ library(FixedPoint)
 library(schumaker)
 library(cubature)
 delta = 0.2
-beta = 0.9
-BudgetStateSpace = c(seq(0,1, 0.015), seq(1.05,3,0.05))
+beta = 0.8
+BudgetStateSpace = c(seq(0,1, 0.05), seq(1.10,3,0.1))
 InitialGuess = sqrt(BudgetStateSpace)
 
 ValueGivenShock = function(Budget, epsilon, NextValueFunction){

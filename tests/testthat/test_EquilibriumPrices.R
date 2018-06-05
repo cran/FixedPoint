@@ -1,5 +1,6 @@
 library(FixedPoint)
 library(testthat)
+library(SQUAREM)
 context("Testing all convergence methods for an equilibrium price vector problem.")
 
 # Consider that there are N households in a pure exchange economy. Every household has identical
@@ -55,10 +56,10 @@ IterateOnce = function(Price){
 
 
 InitialGuess = rep(1,10)
-Test_Of_Convergence = function(Function = IterateOnce, Inputs = InitialGuess, Outputs = c(), Method = c("Newton") , ConvergenceMetric  = function(Resids){max(abs(Resids))} , ConvergenceMetricThreshold = 1e-13, MaxIter = 1e3, MaxM = 10, Dampening = 1, PrintReports = TRUE, ReportingSigFig = 5, ConditionNumberThreshold = 1e10){
+Test_Of_Convergence = function(Function = IterateOnce, Inputs = InitialGuess, Outputs = c(), Method = c("Newton") , ConvergenceMetric  = function(Resids){max(abs(Resids))} , ConvergenceMetricThreshold = 1e-13, MaxIter = 1e3, MaxM = 10, Dampening = 1, PrintReports = FALSE, ReportingSigFig = 5, ConditionNumberThreshold = 1e10){
 
   A = FixedPoint(Function = Function, Inputs = Inputs, Outputs = Outputs, Method = Method, ConvergenceMetric = ConvergenceMetric, ConvergenceMetricThreshold = ConvergenceMetricThreshold, MaxIter = MaxIter, MaxM = MaxM, Dampening = Dampening, PrintReports = PrintReports, ReportingSigFig = ReportingSigFig)
-
+  cat(paste0("The ", Method, " method took ", length(A$Convergence), " iterations and finished with ", A$Finish, "\n"))
   return((A$Convergence[length(A$Convergence)] < ConvergenceMetricThreshold))
 }
 
@@ -72,4 +73,9 @@ test_that("Testing that each method converges in the equilibrium price vector ca
   expect_true(Test_Of_Convergence(Method = "MPE"))      # This takes 11 iterations.
   expect_true(Test_Of_Convergence(Method = "RRE"))      # This takes 12 iterations.
 })
+Func = IterateOnce
+Inputs = InitialGuess
+sqm = SQUAREM::squarem(Inputs,Func, control=list(tol= 1e-13*4 ))
+convergence = sum(abs(sqm$par - Func(sqm$par) ))
+cat(paste0("The squarem method took ", sqm$fpevals, " iterations and finished with convergence of ", convergence, "\n")) # This takes 11 iterations.
 

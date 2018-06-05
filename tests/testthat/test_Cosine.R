@@ -1,11 +1,12 @@
 library(FixedPoint)
 library(testthat)
+library(SQUAREM)
 context("Testing cosine function in 6 dimensions.")
 
-Test_Of_Convergence = function(Function = function(x){ cos(x) }, Inputs = c(0.3, 0.4,0.5,0.6,0.7,0.8), Outputs = c(), Method = c("Newton") , ConvergenceMetric  = function(Resids){max(abs(Resids))} , ConvergenceMetricThreshold = 1e-10, MaxIter = 1e3, MaxM = 10, Dampening = 1, PrintReports = TRUE, ReportingSigFig = 5, ConditionNumberThreshold = 1e10){
+Test_Of_Convergence = function(Function = function(x){ cos(x) }, Inputs = c(0.3, 0.4,0.5,0.6,0.7,0.8), Outputs = c(), Method = c("Newton") , ConvergenceMetric  = function(Resids){max(abs(Resids))} , ConvergenceMetricThreshold = 1e-10, MaxIter = 1e3, MaxM = 10, Dampening = 1, PrintReports = FALSE, ReportingSigFig = 5, ConditionNumberThreshold = 1e10){
 
   A = FixedPoint(Function = Function, Inputs = Inputs, Outputs = Outputs, Method = Method, ConvergenceMetric = ConvergenceMetric, ConvergenceMetricThreshold = ConvergenceMetricThreshold, MaxIter = MaxIter, MaxM = MaxM, Dampening = Dampening, PrintReports = PrintReports, ReportingSigFig = ReportingSigFig)
-
+  cat(paste0("The ", Method, " method took ", length(A$Convergence), " iterations and finished with ", A$Finish, "\n"))
   return((A$Convergence[length(A$Convergence)] < ConvergenceMetricThreshold))
 }
 
@@ -19,11 +20,15 @@ test_that("Testing that each method converges in the cos(x)  case to within tole
   expect_true(Test_Of_Convergence(Method = "VEA"))      # This takes 13  iterations.
   expect_true(Test_Of_Convergence(Method = "SEA"))      # This takes 13  iterations.
 })
+Function = function(x){ cos(x) }
+Inputs = c(0.3, 0.4,0.5,0.6,0.7,0.8)
+SQUAREM::squarem(Inputs,Function, control=list(tol= 1e-10*4 ))
 
-Test_Of_Convergence = function(Function = function(x){ cos(x) }, Inputs = c(0.3, 0.4), Outputs = c(), Method = c("Newton") , ConvergenceMetric  = function(Resids){max(abs(Resids))} , ConvergenceMetricThreshold = 1e-10, MaxIter = 1e3, MaxM = 10, Dampening = 1, PrintReports = TRUE, ReportingSigFig = 5, ConditionNumberThreshold = 1e10){
+
+Test_Of_Convergence = function(Function = function(x){ cos(x) }, Inputs = c(0.3, 0.4), Outputs = c(), Method = c("Newton") , ConvergenceMetric  = function(Resids){max(abs(Resids))} , ConvergenceMetricThreshold = 1e-10, MaxIter = 1e3, MaxM = 10, Dampening = 1, PrintReports = FALSE, ReportingSigFig = 5, ConditionNumberThreshold = 1e10){
 
   A = FixedPoint(Function = Function, Inputs = Inputs, Outputs = Outputs, Method = Method, ConvergenceMetric = ConvergenceMetric, ConvergenceMetricThreshold = ConvergenceMetricThreshold, MaxIter = MaxIter, MaxM = MaxM, Dampening = Dampening, PrintReports = PrintReports, ReportingSigFig = ReportingSigFig)
-
+  cat(paste0("The ", Method, " method took ", length(A$Convergence), " iterations and finished with ", A$Finish, "\n"))
   return((A$Convergence[length(A$Convergence)] < ConvergenceMetricThreshold))
 }
 
@@ -38,11 +43,16 @@ test_that("Testing that each method converges in the cos(x)  case to within tole
   expect_true(Test_Of_Convergence(Method = "SEA"))      # This takes 13  iterations.
 
 })
+Function = function(x){ cos(x) }
+Inputs = c(0.3, 0.4)
+sqm = SQUAREM::squarem(Inputs,Function, control=list(tol= 1e-10*4 ))
+convergence = sum(abs(sqm$par - Function(sqm$par) ))
+cat(paste0("The squarem method took ", sqm$fpevals, " iterations and finished with convergence of ", convergence, "\n")) # This takes 55 iterations.
 
-Test_Of_Convergence = function(Function = function(x){ cos(x) }, Inputs = 0.3, Outputs = c(), Method = c("Newton") , ConvergenceMetric  = function(Resids){max(abs(Resids))} , ConvergenceMetricThreshold = 1e-10, MaxIter = 1e3, MaxM = 10, Dampening = 1, PrintReports = TRUE, ReportingSigFig = 5, ConditionNumberThreshold = 1e10){
+Test_Of_Convergence = function(Function = function(x){ cos(x) }, Inputs = 0.3, Outputs = c(), Method = c("Newton") , ConvergenceMetric  = function(Resids){max(abs(Resids))} , ConvergenceMetricThreshold = 1e-10, MaxIter = 1e3, MaxM = 10, Dampening = 1, PrintReports = FALSE, ReportingSigFig = 5, ConditionNumberThreshold = 1e10){
 
   A = FixedPoint(Function = Function, Inputs = Inputs, Outputs = Outputs, Method = Method, ConvergenceMetric = ConvergenceMetric, ConvergenceMetricThreshold = ConvergenceMetricThreshold, MaxIter = MaxIter, MaxM = MaxM, Dampening = Dampening, PrintReports = PrintReports, ReportingSigFig = ReportingSigFig)
-
+  cat(paste0("The ", Method, " method took ", length(A$Convergence), " iterations and finished with ", A$Finish, "\n"))
   return((A$Convergence[length(A$Convergence)] < ConvergenceMetricThreshold))
 }
 
@@ -56,3 +66,10 @@ test_that("Testing that each method converges in the cos(x)  case to within tole
   expect_true(Test_Of_Convergence(Method = "VEA"))      # This takes 13  iterations.
   expect_true(Test_Of_Convergence(Method = "SEA"))      # This takes 13  iterations.
 })
+Function = function(x){ cos(x) }
+Inputs = c(0.3)
+sqm = SQUAREM::squarem(Inputs,Function, control=list(tol= 1e-10*4 ))
+convergence = sum(abs(sqm$par - Function(sqm$par) ))
+cat(paste0("The squarem method took ", sqm$fpevals, " iterations and finished with convergence of ", convergence, "\n")) # This takes 55 iterations.
+
+

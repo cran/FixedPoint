@@ -74,7 +74,7 @@
 #' E = FixedPoint(Function, Inputs, Method = "Anderson")
 #' F = FixedPoint(Function, Inputs, Method = "Anderson", MaxM = 4, ReportingSigFig = 13)
 FixedPoint = function(Function, Inputs, Outputs = c(), Method = c("Anderson", "Simple", "Aitken", "Newton", "MPE", "RRE", "VEA", "SEA") ,
-                      ConvergenceMetric  = function(Resids){max(abs(Resids))} , ConvergenceMetricThreshold = 1e-10, MaxIter = 1e3, MaxM = 10,
+                      ConvergenceMetric  = function(Residuals){max(abs(Residuals))} , ConvergenceMetricThreshold = 1e-10, MaxIter = 1e3, MaxM = 10,
                       ExtrapolationPeriod = 7, Dampening = 1, ReplaceInvalids = c("ReplaceElements","ReplaceVector","NoAction"), PrintReports = FALSE,
                       ReportingSigFig = 5, ConditionNumberThreshold = 1e3, Plot = c("NoPlot", "ConvergenceFig", "ChangePerIterate"),
                       ConvergenceFigLags = 5, ChangePerIteratexaxis = c()){
@@ -327,9 +327,9 @@ FixedPointNewInput = function(Inputs, Outputs, Method = "Anderson", MaxM = 10, S
       NewGuess = Outputs[,CompletedIters]
      }
   }
+  }
   # Here we apply any dampening and return the new guess.
   return(as.vector(Dampening*NewGuess + (1-Dampening)*Outputs[,CompletedIters] ))
-  }
 }
 
 

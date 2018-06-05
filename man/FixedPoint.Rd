@@ -6,7 +6,7 @@
 \usage{
 FixedPoint(Function, Inputs, Outputs = c(), Method = c("Anderson", "Simple",
   "Aitken", "Newton", "MPE", "RRE", "VEA", "SEA"),
-  ConvergenceMetric = function(Resids) {     max(abs(Resids)) },
+  ConvergenceMetric = function(Residuals) {     max(abs(Residuals)) },
   ConvergenceMetricThreshold = 1e-10, MaxIter = 1000, MaxM = 10,
   ExtrapolationPeriod = 7, Dampening = 1,
   ReplaceInvalids = c("ReplaceElements", "ReplaceVector", "NoAction"),
