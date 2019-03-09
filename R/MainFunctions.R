@@ -48,6 +48,7 @@
 #' @param ChangePerIteratexaxis This only affects anything if Plot == "ChangePerIterate". Sometimes there is a more appropriate xaxis value
 #' to use than (the default) value index for this figure. For instance in the consumption smoothing problem in the vignette every value is a
 #' value function value at a given budget level. In this case the budget levels could be used for this xaxis.
+#' @param DropOldIterates This drops old iterates that will not be used in determining the next fixedpoint guess under the current setting.
 #' @return A list containing the FixedPoint, the Inputs and corresponding Outputs, and convergence values (which are computed under the
 #' "ConvergenceMetric"). The list will also include a "Finish" statement describing why it has finished. This is often going to be due to
 #' either MaxIter or ConvergenceMetricThreshold being  reached. It may also terminate due to an error in generating a new input guess or using
@@ -77,7 +78,7 @@ FixedPoint = function(Function, Inputs, Outputs = c(), Method = c("Anderson", "S
                       ConvergenceMetric  = function(Residuals){max(abs(Residuals))} , ConvergenceMetricThreshold = 1e-10, MaxIter = 1e3, MaxM = 10,
                       ExtrapolationPeriod = 7, Dampening = 1, ReplaceInvalids = c("ReplaceElements","ReplaceVector","NoAction"), PrintReports = FALSE,
                       ReportingSigFig = 5, ConditionNumberThreshold = 1e3, Plot = c("NoPlot", "ConvergenceFig", "ChangePerIterate"),
-                      ConvergenceFigLags = 5, ChangePerIteratexaxis = c()){
+                      ConvergenceFigLags = 5, ChangePerIteratexaxis = c(), DropOldIterates = FALSE){
   # Checking inputs to the function
   Method = Method[1]
   Plot   = Plot[1]
@@ -108,10 +109,10 @@ FixedPoint = function(Function, Inputs, Outputs = c(), Method = c("Anderson", "S
     NewOutputVector = try(Function(Inputs[,1]))
     # In the event of an error we return informative information on the error.
     if (class(NewOutputVector) == "try-error"){return(list(Inputs = Inputs, Outputs = NA, Convergence = NA, FixedPoint = NA,
-                                                           Finish = "Could not execute function with input vector"))}
+                                                           Finish = "Could not execute function with input vector", fpevals = 1))}
     if (sum(is.na(NewOutputVector))){return(list(Inputs = Inputs, Outputs = NA, Convergence = NA, FixedPoint = NA,
                                                  Finish = "New output vector contains NAs", NewInputVector = Inputs,
-                                                 NewOutputVector = NewOutputVector))}
+                                                 NewOutputVector = NewOutputVector, fpevals = 1))}
     # If no error we put the results into the Outputs matrix.
     Outputs = matrix(Function(Inputs[,1]), ncol = 1)
   } else {
@@ -127,7 +128,7 @@ FixedPoint = function(Function, Inputs, Outputs = c(), Method = c("Anderson", "S
   ConvergenceVector = sapply(1:iter, function(x) ConvergenceMetric(Resid[,x]) )
   if (ConvergenceVector[iter] < ConvergenceMetricThreshold){
     if (PrintReports){cat("The last column of Inputs matrix is already a fixed point under input convergence metric and convergence threshold")}
-    return(list(FixedPoint = Outputs[,iter] , Inputs = Inputs, Outputs = Outputs, Convergence = ConvergenceVector))
+    return(list(FixedPoint = Outputs[,iter] , Inputs = Inputs, Outputs = Outputs, Convergence = ConvergenceVector, fpevals = iter))
   }
   # Printing a report for initial convergence
   Convergence = ConvergenceVector[iter]
@@ -146,27 +147,31 @@ FixedPoint = function(Function, Inputs, Outputs = c(), Method = c("Anderson", "S
                                               Dampening = Dampening, ConditionNumberThreshold = ConditionNumberThreshold,
                                               PrintReports = PrintReports, ReplaceInvalids = ReplaceInvalids)})
     if (class(NewInputVector) == "try-error"){return(list(Inputs = Inputs, Outputs = Outputs, Convergence = ConvergenceVector,
-                                                          FixedPoint = NA, Finish = "Could not generate new input vector"))}
+                                                          FixedPoint = NA, Finish = "Could not generate new input vector", fpevals = iter))}
     if (sum(is.na(NewInputVector))>0.5){return(list(Inputs = Inputs, Outputs = Outputs, Convergence = ConvergenceVector,
-                                                FixedPoint = NA, Finish = "New input vector contains NAs", NewInputVector = NewInputVector))}
+                                                FixedPoint = NA, Finish = "New input vector contains NAs", NewInputVector = NewInputVector, fpevals = iter))}
     if (sum(is.infinite(NewInputVector))>0.5){return(list(Inputs = Inputs, Outputs = Outputs, Convergence = ConvergenceVector,
-                                                    FixedPoint = NA, Finish = "New input vector contains Infs", NewInputVector = NewInputVector))}
+                                                    FixedPoint = NA, Finish = "New input vector contains Infs", NewInputVector = NewInputVector, fpevals = iter))}
     if (Method != "Anderson" & PrintReports){cat(paste0(format(" ", width = 49, justify = "right")))}
     # Putting this input through the function to get a new output guess.
     NewOutputVector = try({Function(NewInputVector)})
     if (class(NewOutputVector) == "try-error"){return(list(Inputs = Inputs, Outputs = Outputs, Convergence = ConvergenceVector,
                                                            FixedPoint = NA, Finish = "Could not execute function with generated vector",
-                                                           NewInputVector = NewInputVector))}
+                                                           NewInputVector = NewInputVector, fpevals = iter))}
     if (sum(is.na(NewOutputVector))){return(list(Inputs = Inputs, Outputs = Outputs, Convergence = ConvergenceVector,
                                                  FixedPoint = NA, Finish = "New output vector contains NAs", NewInputVector = NewInputVector,
-                                                 NewOutputVector = NewOutputVector))}
+                                                 NewOutputVector = NewOutputVector, fpevals = iter))}
     # Adding input and output to saved matrices.
-    Inputs  = matrix(c(Inputs, NewInputVector), ncol = iter, byrow = FALSE)
-    Outputs = matrix(c(Outputs, NewOutputVector), ncol = iter, byrow = FALSE)
-    Resid   = matrix(c(Resid, NewOutputVector - NewInputVector), ncol = iter, byrow = FALSE)
+    width = length(ConvergenceVector)
+    adjustedData = adjustData(Inputs, Outputs, Resid, ConvergenceVector, NewInputVector, NewOutputVector, SimpleStartIndex, ConvergenceMetric, width, iter, MaxM, ExtrapolationPeriod, Method, DropOldIterates)
+    Inputs = adjustedData$Inputs
+    Outputs = adjustedData$Outputs
+    Resid = adjustedData$Resids
+    ConvergenceVector = adjustedData$ConvergenceVector
+    SimpleStartIndex = adjustedData$SimpleStartIndex
+    newWidth = length(ConvergenceVector)
     # Checking and recording convergence
-    ConvergenceVector =  c(ConvergenceVector, ConvergenceMetric(Resid[,iter]) )
-    Convergence = ConvergenceVector[iter]
+    Convergence = ConvergenceVector[newWidth]
     # Output of report and going to next iteration.
     if (PrintReports){cat(paste0("Method: ", format(Method, width = 8, justify = "right")   , ". Iteration: ",
                                  format(iter, digits =  0, width = 5,scientific = FALSE), ". Convergence: ",
@@ -182,7 +187,48 @@ FixedPoint = function(Function, Inputs, Outputs = c(), Method = c("Anderson", "S
   FixedPoint = Outputs[,dim(Outputs)[2]]
   # Returning result
   if (Convergence < ConvergenceMetricThreshold){Finish = "Reached Convergence Threshold"} else {Finish = "Reached MaxIter"}
-  return(list(Inputs = Inputs, Outputs = Outputs, Convergence = ConvergenceVector, FixedPoint = FixedPoint, Finish = Finish))
+  return(list(Inputs = Inputs, Outputs = Outputs, Convergence = ConvergenceVector, FixedPoint = FixedPoint, Finish = Finish, fpevals = iter-1))
+}
+
+adjustData = function(oldInputs, oldOutputs, oldResids, oldConvergences, newInput, newOutput, SimpleStartIndex, ConvergenceMetric, width, iter, MaxM, ExtrapolationPeriod, Method, DropOldIterates){
+  newResid = newOutput - newInput
+  newConvergence = ConvergenceMetric(newResid)
+  expandedWidth = width+1
+  Inputs   = matrix(c(oldInputs , newInput)           , ncol = expandedWidth, byrow = FALSE)
+  Outputs  = matrix(c(oldOutputs, newOutput)          , ncol = expandedWidth, byrow = FALSE)
+  Resid    = matrix(c(oldResids , newResid - newInput), ncol = expandedWidth, byrow = FALSE)
+  ConvergenceVector =  c(oldConvergences, newConvergence)
+  if (!(DropOldIterates)){
+    return(list(Inputs = Inputs, Outputs = Outputs, Resids = Resid, ConvergenceVector = ConvergenceVector, SimpleStartIndex = SimpleStartIndex))
+  }
+  from = 1
+  if (Method == "Simple"){
+    from = expandedWidth
+  } else if (Method == "Anderson"){
+    from = max(1,expandedWidth - (MaxM+1))
+  } else if (Method %in% c("Aitken", "Newton")){
+    from = max(1, expandedWidth - 4)
+  } else if (Method %in% c("MPE", "RRE", "VEA", "SEA")){
+    from = max(1, expandedWidth - (ExtrapolationPeriod+1))
+  }
+  newWidth = expandedWidth - from + 1
+  iteratesLost = (newWidth - width)-1
+  newSimpleStartIndex = SimpleStartIndex
+  if (Method == "Simple"){
+    newSimpleStartIndex = 1
+  } else if (Method == "Anderson"){
+    newSimpleStartIndex = newWidth
+  } else if (Method %in% c("Aitken", "Newton")){
+    startIndices = c(SimpleStartIndex - iteratesLost, SimpleStartIndex + 3)
+    newSimpleStartIndex = min(startIndices[startIndices > 0])
+  } else if (Method %in% c("MPE", "RRE", "VEA", "SEA")){
+    startIndices = c(SimpleStartIndex - iteratesLost, SimpleStartIndex + ExtrapolationPeriod)
+    newSimpleStartIndex = min(startIndices[startIndices > 0])
+  }
+
+  return(list(Inputs = matrix(Inputs[,from:expandedWidth], ncol = newWidth), Outputs           = matrix(Outputs[,from:expandedWidth]         , ncol = newWidth),
+              Resids = matrix(Resid[,from:expandedWidth] , ncol = newWidth), ConvergenceVector = matrix(ConvergenceVector[from:expandedWidth], ncol = newWidth),
+              SimpleStartIndex = newSimpleStartIndex))
 }
 
 #' FixedPointNewInput
@@ -268,9 +314,9 @@ FixedPointNewInput = function(Inputs, Outputs, Method = "Anderson", MaxM = 10, S
     }
     # Print information on the use of the anderson method and return the new guess.
     if (PrintReports){cat(paste0("Condition number is ", format(format(ConditionNumber, digits = 5,scientific = TRUE), width = 12, justify = "right")
-                                 ,". Used:",  format(M+1, width = 3, justify = "right"), " lags. "))}
-    NewGuess        = LastOutput - Dampening * Coeffs  %*% t(DeltaOutputs)
-    NewGuess = as.vector(NewGuess)
+                               ,". Used:",  format(M+1, width = 3, justify = "right"), " lags. "))}
+      NewGuess = LastOutput - Coeffs  %*% t(DeltaOutputs)
+      NewGuess = as.vector(NewGuess)
   } else if (Method == "Aitken"){
     if ((CompletedIters + SimpleStartIndex) %% 3 == 0){
       # If we are in 3rd, 6th, 9th, 12th iterate from when we started Acceleration then we want to do a jumped Iterate,

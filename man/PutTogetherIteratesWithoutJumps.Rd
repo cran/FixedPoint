@@ -5,8 +5,8 @@
 \title{PutTogetherIteratesWithoutJumps
 This function takes the previous inputs and outputs and assembles a matrix with both excluding jumps.}
 \usage{
-PutTogetherIteratesWithoutJumps(Inputs, Outputs, AgreementThreshold = 10 *
-  .Machine$double.eps)
+PutTogetherIteratesWithoutJumps(Inputs, Outputs, AgreementThreshold = 10
+  * .Machine$double.eps)
 }
 \arguments{
 \item{Inputs}{This is an N x A matrix of previous inputs for which corresponding outputs are available. In this case N is the

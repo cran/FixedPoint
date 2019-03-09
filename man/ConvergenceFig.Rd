@@ -6,8 +6,8 @@
 \usage{
 ConvergenceFig(Inputs, Outputs, Input_Convergence = c(),
   LinesToDraw = c("Sup_Norm", "Euclidean_Norm",
-  "Sum_Of_Absolute_Value_Of_Residuals", "Smallest_Residual"), LogScale = TRUE,
-  FromIterate = 1, ToIterate = c())
+  "Sum_Of_Absolute_Value_Of_Residuals", "Smallest_Residual"),
+  LogScale = TRUE, FromIterate = 1, ToIterate = c())
 }
 \arguments{
 \item{Inputs}{The Inputs matrix returned by FixedPoint.}

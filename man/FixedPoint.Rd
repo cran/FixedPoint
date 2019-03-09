@@ -4,15 +4,16 @@
 \alias{FixedPoint}
 \title{A function for finding the fixed point of a contraction mapping}
 \usage{
-FixedPoint(Function, Inputs, Outputs = c(), Method = c("Anderson", "Simple",
-  "Aitken", "Newton", "MPE", "RRE", "VEA", "SEA"),
+FixedPoint(Function, Inputs, Outputs = c(), Method = c("Anderson",
+  "Simple", "Aitken", "Newton", "MPE", "RRE", "VEA", "SEA"),
   ConvergenceMetric = function(Residuals) {     max(abs(Residuals)) },
   ConvergenceMetricThreshold = 1e-10, MaxIter = 1000, MaxM = 10,
   ExtrapolationPeriod = 7, Dampening = 1,
   ReplaceInvalids = c("ReplaceElements", "ReplaceVector", "NoAction"),
   PrintReports = FALSE, ReportingSigFig = 5,
   ConditionNumberThreshold = 1000, Plot = c("NoPlot", "ConvergenceFig",
-  "ChangePerIterate"), ConvergenceFigLags = 5, ChangePerIteratexaxis = c())
+  "ChangePerIterate"), ConvergenceFigLags = 5,
+  ChangePerIteratexaxis = c(), DropOldIterates = FALSE)
 }
 \arguments{
 \item{Function}{This is the function for which a fixed point is sought. This function must take and return a vector of the same dimension.}
@@ -76,6 +77,8 @@ the x axis. By default it is 5. To see them all set it to a high number.}
 \item{ChangePerIteratexaxis}{This only affects anything if Plot == "ChangePerIterate". Sometimes there is a more appropriate xaxis value
 to use than (the default) value index for this figure. For instance in the consumption smoothing problem in the vignette every value is a
 value function value at a given budget level. In this case the budget levels could be used for this xaxis.}
+
+\item{DropOldIterates}{This drops old iterates that will not be used in determining the next fixedpoint guess under the current setting.}
 }
 \value{
 A list containing the FixedPoint, the Inputs and corresponding Outputs, and convergence values (which are computed under the
