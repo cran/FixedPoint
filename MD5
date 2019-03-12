@@ -1,13 +1,13 @@
-6001424e910df6da0f0a2d345c5b586b *DESCRIPTION
+38914874e9a35a2079f166e700b3a794 *DESCRIPTION
 e8806c1f4c9244a18689ab343f7f827b *LICENSE
 39b24fbd9c823e7e51e6d957276955a5 *NAMESPACE
 e0843422229fe0b49b3fec544346f891 *R/Figures.R
 28d6ff6791fb12c5075093b7492e442d *R/MainFunctions.R
 86556ca70f728a9102189425f9d51b09 *README.md
-84c22c5fcd7916fe202d1e4a18bbed3e *build/vignette.rds
+fbe32b85149bbc519b8b148808d876b8 *build/vignette.rds
 51b92ca5f544d2c966321707c07055f2 *inst/doc/FixedPoint.R
 52fecc141aa301d20d000c2a96850be4 *inst/doc/FixedPoint.Rmd
-ef607e1612ad6335fd964e08c25dcf89 *inst/doc/FixedPoint.html
+aebb0cd1130d77cbfee4d17f08de3540 *inst/doc/FixedPoint.pdf
 876ab6b19900a83846c3a8c43c9f6d59 *man/ChangePerIterate.Rd
 ffd8b93a125b6acd1c728acfe01c8afc *man/ConvergenceFig.Rd
 9e52e21c3607722b32c00893fd4d75a0 *man/EpsilonExtrapolation.Rd
@@ -32,4 +32,5 @@ ef08fe0344f5615009ccade07a3bf170 *tests/testthat/test_ValueFunctionProblem.R
 d96748d66a415caf9882f0f75de3edc6 *vignettes/Bibliography.bib
 25f8ad8c5cecec6e323180c5963619c6 *vignettes/EpsilonTriangle.png
 52fecc141aa301d20d000c2a96850be4 *vignettes/FixedPoint.Rmd
+5c6c267cb69c83ad640b6eaffc8127c3 *vignettes/FixedPoint.md
 e56edf4aa0ced5d529d0e27a2084474c *vignettes/PerformanceTable.png
