@@ -1,20 +1,20 @@
-## ---- fig.show='hold', fig.width=7, fig.height=4.5-----------------------
+## ---- fig.show='hold', fig.width=7, fig.height=4.5----------------------------
 library(FixedPoint)
 SequenceFunction = function(tn){0.5*(tn + 100/tn)}
 
 FP_Simple   = FixedPoint(Function=SequenceFunction,Inputs = 6,  Method = "Simple")
 
-## ---- fig.show='hold', fig.width=7, fig.height=4.5-----------------------
+## ---- fig.show='hold', fig.width=7, fig.height=4.5----------------------------
 NumbersVector = 1:100
 SequenceFunction = function(tn){0.5*(tn + NumbersVector/tn)}
 FP_SEA   = FixedPoint(Function = SequenceFunction, Inputs = 1:100,  Method = "RRE")
 
-## ---- fig.show='hold', fig.width=7, fig.height=4.5-----------------------
+## ---- fig.show='hold', fig.width=7, fig.height=4.5----------------------------
 SimpleVectorFunction = function(x){c(0.5*sqrt(abs(x[1] + x[2])), 1.5*x[1] + 0.5*x[2])}
 FP_Simple = FixedPoint(Function = SimpleVectorFunction, Inputs = c(0.3,900), Method = "Simple")
 FP_Anderson = FixedPoint(Function = SimpleVectorFunction, Inputs = c(0.3,900), Method = "Anderson")
 
-## ---- fig.show='hold', fig.width=7, fig.height=4.5-----------------------
+## ---- fig.show='hold', fig.width=7, fig.height=4.5----------------------------
 Run1 = FixedPoint(Function = function(x){x^0.2}, Inputs = c(0.3, 0.4,0.5),
                 Method = "Aitken")
 cat(paste("Running this all at once takes ", length(Run1$Convergence), " iterations and 
@@ -28,7 +28,7 @@ Run2_2 = FixedPoint(Function = function(x){x^0.2}, Inputs = Run2_1$Inputs,
 cat(paste("Running this with a break takes ", length(Run2_2$Convergence), " iterations and 
           convergences to ",  Run2_2$Convergence[length(Run2_2$Convergence)], "\n"))
 
-## ---- fig.show='hold', fig.width=7, fig.height=4.5-----------------------
+## ---- fig.show='hold', fig.width=7, fig.height=4.5----------------------------
 StretchFactor = c(1,1.1,1.2,3,3.3,3.6,7,8,9,15, 20)
 
 FPFunction = function(x){
@@ -53,7 +53,7 @@ ChangePerIterate(FPSolution$Inputs, FPSolution$Outputs, FPSolution$Convergence,
                  FromIterate = 2, ToIterate = 2, secondhold = -1, xaxis = StretchFactor)
 
 
-## ---- fig.show='hold', fig.width=7, fig.height=4.5-----------------------
+## ---- fig.show='hold', fig.width=7, fig.height=4.5----------------------------
 SimpleVectorFunction = function(x){c(0.5*sqrt(x[1] + x[2]), 1.5*x[1] + 0.5*x[2])}
 FPSolution = FixedPoint(Function = SimpleVectorFunction, Inputs = c(0.3,900),
                         Method = "Anderson")
@@ -71,7 +71,7 @@ FPSolution = FixedPoint(Function = SimpleVectorFunction, Inputs = FPSolution$Inp
 FPSolution = FixedPoint(Function = SimpleVectorFunction, Inputs = FPSolution$Inputs,
                         Outputs = FPSolution$Outputs, Method = "Anderson")
 
-## ---- fig.show='hold', fig.width=10, fig.height=4.5----------------------
+## ---- fig.show='hold', fig.width=10, fig.height=4.5---------------------------
 phi = 10
 Numbering = matrix(seq(1,phi^2,1), phi) # Numbering scheme for squares.
 
@@ -99,7 +99,7 @@ FPSolution = FixedPoint(Function = function(x) TwoDimensionalDiffusionIteration(
                Inputs =  c(rep(0,50), rep(1,50)), Method = "RRE")
 
 
-## ---- fig.show='hold', fig.width=7, fig.height=4.5-----------------------
+## ---- fig.show='hold', fig.width=7, fig.height=4.5----------------------------
 # Generating data
 set.seed(3112)
 N = 8
@@ -131,7 +131,7 @@ IterateOnce = function(Price){
 InitialGuess = rep(1,10)
 FPSolution = FixedPoint(Function = IterateOnce, Inputs =  InitialGuess, Method = "VEA")
 
-## ---- fig.show='hold', fig.width=7, fig.height=4.5-----------------------
+## ---- fig.show='hold', fig.width=7, fig.height=4.5----------------------------
 # Generating linearly seperable data
 set.seed(10)
 data = data.frame("x1" = rnorm(10,4,2), "x2" = rnorm(10,8,2), y = -1)
@@ -165,7 +165,7 @@ FP = FixedPoint(Function = IteratePerceptronWeights, Inputs =  InitialGuess,
                 Method = "Simple", MaxIter = 1200)
 plotLine(FP$FixedPoint)
 
-## ---- fig.show='hold', fig.width=7, fig.height=4.5-----------------------
+## ---- fig.show='hold', fig.width=7, fig.height=4.5----------------------------
 IteratePerceptronWeights = function(w, LearningRate = 1){
   intSeq = 1:length(data[,"y"])
   for (i in intSeq){
@@ -184,7 +184,7 @@ IteratePerceptronWeights = function(w, LearningRate = 1){
 
 FP = FixedPoint(Function = IteratePerceptronWeights, Inputs =  InitialGuess, Method = "MPE")
 
-## ---- fig.show='hold', fig.width=10, fig.height=4.5----------------------
+## ---- fig.show='hold', fig.width=10, fig.height=4.5---------------------------
 d = 0.05
 sigma = 0.1
 alpha = 4
@@ -224,7 +224,7 @@ IterateOnce = function(OptionPrice){
 # This can be run sequentially with the following algorithm.
 FPSolution = FixedPoint(Function = IterateOnce, Inputs = OptionPrice, Method = "MPE")
 
-## ---- fig.show='hold', fig.width=10, fig.height=4.5----------------------
+## ---- fig.show='hold', fig.width=10, fig.height=4.5---------------------------
 library(FixedPoint)
 library(schumaker)
 library(cubature)
@@ -260,7 +260,7 @@ IterateOnce = function(BudgetValues){
 FPSolution = FixedPoint(Function = IterateOnce,Inputs = InitialGuess,Method = c("Anderson"))
 
 
-## ---- fig.show='hold', fig.width=7, fig.height=4.5-----------------------
+## ---- fig.show='hold', fig.width=7, fig.height=4.5----------------------------
 library(foreach)
 library(doParallel)
 

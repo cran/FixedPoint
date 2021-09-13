@@ -6,10 +6,18 @@
 This function takes the previous inputs and outputs from the FixedPoint function and determines what vector to try next in seeking
 a fixed point.}
 \usage{
-FixedPointNewInput(Inputs, Outputs, Method = "Anderson", MaxM = 10,
-  SimpleStartIndex = 1, ExtrapolationPeriod = 7, Dampening = 1,
-  ConditionNumberThreshold = 1000, PrintReports = FALSE,
-  ReplaceInvalids = c("ReplaceElements", "ReplaceVector", "NoAction"))
+FixedPointNewInput(
+  Inputs,
+  Outputs,
+  Method = "Anderson",
+  MaxM = 10,
+  SimpleStartIndex = 1,
+  ExtrapolationPeriod = 7,
+  Dampening = 1,
+  ConditionNumberThreshold = 1000,
+  PrintReports = FALSE,
+  ReplaceInvalids = c("ReplaceElements", "ReplaceVector", "NoAction")
+)
 }
 \arguments{
 \item{Inputs}{This is an N x A matrix of previous inputs for which corresponding outputs are available. In this case N is the

@@ -5,10 +5,19 @@
 \title{ChangePerIterate
 A function for plotting the change in each vector per iterate.}
 \usage{
-ChangePerIterate(Inputs, Outputs, ConvergenceVector = c(),
-  ConvergenceSigFig = 5, ShowInputs = TRUE, ShowOutputs = TRUE,
-  ShowPrevious = TRUE, xaxis = c(), secondhold = 0,
-  FromIterate = 1, ToIterate = c())
+ChangePerIterate(
+  Inputs,
+  Outputs,
+  ConvergenceVector = c(),
+  ConvergenceSigFig = 5,
+  ShowInputs = TRUE,
+  ShowOutputs = TRUE,
+  ShowPrevious = TRUE,
+  xaxis = c(),
+  secondhold = 0,
+  FromIterate = 1,
+  ToIterate = c()
+)
 }
 \arguments{
 \item{Inputs}{The Inputs matrix returned by FixedPoint.}

@@ -44,7 +44,7 @@ Test_Of_Convergence = function(Function = function(w)IteratePerceptronWeights(w,
 }
 
 
-test_that("Testing that each method converges", {
+#test_that("Testing that each method converges", {
   #expect_true(Test_Of_Convergence(Method = "Anderson")) # Does not converge (Fixed point found is outside numerical precision)
   #expect_true(Test_Of_Convergence(Method = "Simple"))    # This takes 1121 iterations.
   #expect_true(Test_Of_Convergence(Method = "Aitken"))   # Does not converge
@@ -53,7 +53,7 @@ test_that("Testing that each method converges", {
   #expect_true(Test_Of_Convergence(Method = "SEA"))      # Does not converge - Contains Infs
   #expect_true(Test_Of_Convergence(Method = "MPE"))      # Does not converge (Fixed point found is outside numerical precision)
   #expect_true(Test_Of_Convergence(Method = "RRE"))      # Does not converge
-})
+#})
 
 #Func = function(w)IteratePerceptronWeights(w,1)
 #Inputs = InitialGuess
