@@ -108,7 +108,7 @@ FixedPoint = function(Function, Inputs, Outputs = c(), Method = c("Anderson", "S
     Inputs          = matrix(Inputs, ncol = 1)
     NewOutputVector = try(Function(Inputs[,1]))
     # In the event of an error we return informative information on the error.
-    if (class(NewOutputVector) == "try-error"){return(list(Inputs = Inputs, Outputs = NA, Convergence = NA, FixedPoint = NA,
+    if (inherits(NewOutputVector, "try-error")){return(list(Inputs = Inputs, Outputs = NA, Convergence = NA, FixedPoint = NA,
                                                            Finish = "Could not execute function with input vector", fpevals = 1))}
     if (sum(is.na(NewOutputVector))){return(list(Inputs = Inputs, Outputs = NA, Convergence = NA, FixedPoint = NA,
                                                  Finish = "New output vector contains NAs", NewInputVector = Inputs,
@@ -133,7 +133,7 @@ FixedPoint = function(Function, Inputs, Outputs = c(), Method = c("Anderson", "S
   # Printing a report for initial convergence
   Convergence = ConvergenceVector[iter]
   if (PrintReports){cat(paste0(format(" ", width = 49, justify = "right"), "Method: ", format(Method, width = 8, justify = "right")   ,
-                               ". Iteration: ", format(iter, digits =  0, width = 5,scientific = FALSE),
+                               ". Iteration: ", format(iter, digits =  5, width = 5,scientific = FALSE),
                                ". Convergence: ",formatC(Convergence,  big.interval = 1, small.interval = ReportingSigFig, format = "e"),"\n"))}
   if (Plot == "ConvergenceFig"){ConvergenceFig(Inputs, Outputs,  Input_Convergence = ConvergenceVector, FromIterate = 1)}
   if (Plot == "ChangePerIterate"){ChangePerIterate(Inputs, Outputs, ConvergenceVector, FromIterate = dim(Inputs)[2],
@@ -146,7 +146,7 @@ FixedPoint = function(Function, Inputs, Outputs = c(), Method = c("Anderson", "S
                                               SimpleStartIndex = SimpleStartIndex, ExtrapolationPeriod = ExtrapolationPeriod,
                                               Dampening = Dampening, ConditionNumberThreshold = ConditionNumberThreshold,
                                               PrintReports = PrintReports, ReplaceInvalids = ReplaceInvalids)})
-    if (class(NewInputVector) == "try-error"){return(list(Inputs = Inputs, Outputs = Outputs, Convergence = ConvergenceVector,
+    if (inherits(NewInputVector, "try-error")){return(list(Inputs = Inputs, Outputs = Outputs, Convergence = ConvergenceVector,
                                                           FixedPoint = NA, Finish = "Could not generate new input vector", fpevals = iter))}
     if (sum(is.na(NewInputVector))>0.5){return(list(Inputs = Inputs, Outputs = Outputs, Convergence = ConvergenceVector,
                                                 FixedPoint = NA, Finish = "New input vector contains NAs", NewInputVector = NewInputVector, fpevals = iter))}
@@ -155,7 +155,7 @@ FixedPoint = function(Function, Inputs, Outputs = c(), Method = c("Anderson", "S
     if (Method != "Anderson" & PrintReports){cat(paste0(format(" ", width = 49, justify = "right")))}
     # Putting this input through the function to get a new output guess.
     NewOutputVector = try({Function(NewInputVector)})
-    if (class(NewOutputVector) == "try-error"){return(list(Inputs = Inputs, Outputs = Outputs, Convergence = ConvergenceVector,
+    if (inherits(NewOutputVector, "try-error")){return(list(Inputs = Inputs, Outputs = Outputs, Convergence = ConvergenceVector,
                                                            FixedPoint = NA, Finish = "Could not execute function with generated vector",
                                                            NewInputVector = NewInputVector, fpevals = iter))}
     if (sum(is.na(NewOutputVector))){return(list(Inputs = Inputs, Outputs = Outputs, Convergence = ConvergenceVector,
@@ -174,7 +174,7 @@ FixedPoint = function(Function, Inputs, Outputs = c(), Method = c("Anderson", "S
     Convergence = ConvergenceVector[newWidth]
     # Output of report and going to next iteration.
     if (PrintReports){cat(paste0("Method: ", format(Method, width = 8, justify = "right")   , ". Iteration: ",
-                                 format(iter, digits =  0, width = 5,scientific = FALSE), ". Convergence: ",
+                                 format(iter, digits =  5, width = 5,scientific = FALSE), ". Convergence: ",
                                  formatC(Convergence,  big.interval = 1, small.interval = ReportingSigFig, format = "e"), "\n"))}
     if (Plot == "ConvergenceFig"){ConvergenceFig(Inputs, Outputs,  Input_Convergence =  ConvergenceVector,
                                                  FromIterate = max(1, dim(Inputs)[2]- ConvergenceFigLags))}
@@ -272,7 +272,7 @@ FixedPointNewInput = function(Inputs, Outputs, Method = "Anderson", MaxM = 10, S
     return( as.vector(Outputs[,CompletedIters] ))
   } else if (Method == "Anderson"){
     if (CompletedIters < 1.5){
-      if (PrintReports){cat(paste0(format(" ", width = 32, justify = "right"), "  Using",  format(0, width = 3, justify = "right")," lags. "))}
+      if (PrintReports){cat(paste0(format(" ", width = 32, justify = "right"), "  Using",  format(3, width = 3, justify = "right")," lags. "))}
       return(as.vector( Outputs[,CompletedIters] ))
     }
     # Extract variables for anderson acceleration algorithm.
@@ -305,7 +305,7 @@ FixedPointNewInput = function(Inputs, Outputs, Method = "Anderson", MaxM = 10, S
       if (M < 1.5){
         # This happens occasionally in test cases where the iteration is very close to a fixed point.
         if (PrintReports){cat(paste0(format(" ", width = 32, justify = "right"), "  Using",
-                                     format(0, width = 3, justify = "right")," lags. "))}
+                                     format(3, width = 3, justify = "right")," lags. "))}
         return(LastOutput)
       }
       DeltaOutputs= matrix(DeltaOutputs[, 2:(M+1)], ncol = M)

@@ -9,7 +9,9 @@ FixedPoint(
   Inputs,
   Outputs = c(),
   Method = c("Anderson", "Simple", "Aitken", "Newton", "MPE", "RRE", "VEA", "SEA"),
-  ConvergenceMetric = function(Residuals) {     max(abs(Residuals)) },
+  ConvergenceMetric = function(Residuals) {
+     max(abs(Residuals))
+ },
   ConvergenceMetricThreshold = 1e-10,
   MaxIter = 1000,
   MaxM = 10,
